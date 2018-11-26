@@ -243,7 +243,6 @@
             </div>
         </div>
         <div class="layui-form-item">
-            </div>
 	        <div class="layui-inline">
 	            <div class="layui-input-block">
 	                <button type="button" class="layui-btn" onclick="agentsSave_1('{{ csrf_token() }}')">确定</button>
