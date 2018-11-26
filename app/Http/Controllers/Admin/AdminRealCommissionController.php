@@ -68,7 +68,7 @@
 			
 			$_allsumdata['search_total'] = Mt4Trades::selectRaw ("
 					/*总返佣*/
-					sum( case when mt4_trades.CMD = 6 and mt4_trades.COMMENT like '%-FY' and mt4_trades.PROFIT > 0 then mt4_trades.PROFIT else 0 end ) as total_profit
+					sum( case when mt4_trades.CMD = 6 and mt4_trades.COMMENT like '%-FY' then mt4_trades.PROFIT else 0 end ) as total_profit
 				")->where('mt4_trades.CMD', 6)
 				->where('mt4_trades.COMMENT', 'like', '%-FY')
 				->where(function ($subWhere) use ($data) {

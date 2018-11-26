@@ -205,6 +205,7 @@
 		'whs_exp_acc_name'                                                 => '爆仓姓名',
 		'whs_exp_bal'                                                      => '账户余额',
 		'whs_exp_crt'                                                      => '账户信用',
+		'whs_exp_status'                                                   => '清零状态',
 		'whs_exp_is_zero_date'                                             => '清零日期',
 		
 		//销户申请

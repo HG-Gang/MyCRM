@@ -1231,3 +1231,42 @@ function fengXianValFormat(value) {
 
 	return str ;
 }
+
+function wezstatus(value)
+{
+	if (value == "1") {
+		return "<span style='color:#6633CC;'>待清零</span>";
+	} else if (value == 2) {
+		return "<span style='color:#15ccb6;'>已清零</span>";
+	} else {
+		return "<span style='color:red;'>未知状态</span>";
+	}
+}
+
+function againSendSMS(uid, _token)
+{
+	if (!$("#sendSms").hasClass("layui-btn-disabled")) {
+		$.ajax({
+			url: route_prefix() + "/send/againSendSms",
+			data: {
+				userId: uid,
+				_token: _token,
+			},
+			dateType: "JSON",
+			type: "POST",
+			async: false,
+			success: function (data) {
+				if (data.msg == "SUC") {
+					layer.msg('短信发送成功', {icon: 6});
+						$("#sendSms").addClass("layui-btn-disabled");
+				} else if (data.msg == "FAIL") {
+				console.log(data.err);
+				layer.msg('短信发送失败', {icon: 5});
+				}
+			},
+			error: function () {
+				layer.msg("未知错误,请尝试重新操作或联系客服.");
+		}
+	});
+	}
+}

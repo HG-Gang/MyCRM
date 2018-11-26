@@ -63,7 +63,7 @@ function RoleName($id) {
 
     function resource_version_number ()
     {
-    	return '0.0.15';
+    	return '0.0.17';
     }
     
     function Official_web_address ()

@@ -114,7 +114,7 @@
 				{field:'total_volume' ,title:'{{ trans ('systemlanguage.direct_customer_user_total_volume') }}', width:100, align:'center'},
 				{field:'total_swaps' ,title:'{{ trans ('systemlanguage.direct_customer_user_swap') }}', width:100, align:'center'},
 				{field:'mt4_regdate' ,title:'{{ trans ('systemlanguage.direct_customer_user_rec_crt_date') }}', width:120},
-				{field:'comm_trans' ,title:'{{ trans ('systemlanguage.direct_customer_comm_trans') }}', width:100, align:'center', formatter: function (value, rowData, rowIndex) {
+				/*{field:'comm_trans' ,title:'{{ trans ('systemlanguage.direct_customer_comm_trans') }}', width:100, align:'center', formatter: function (value, rowData, rowIndex) {
 					if (rowData.parent_id == '{{ $_user_info['user_id'] }}') {
 						//是直属客户
 						return "<font color='blue' style='cursor:pointer;' onclick='custCommissionTransfer("+ rowData.user_id +")'>"+ '转给TA' +"</font>";
@@ -123,7 +123,7 @@
 					}
 					
 					return "======";
-				}},
+				}},*/
 			]];
 			
 			return config;

@@ -24,7 +24,7 @@
 		const ZH                = '-ZH ';
 		const QK                = '-QK';
 		const RJTH              = '-RJTH ';
-		const BCQLXYDK          = '-BCQLXYDK';
+		const BCQL              = '-BCQL';
 		const Adj               = '-Adj';
 		const MODIFY_MT4_MAINPSW = 1; //修改主密码
 		const MODIFY_MT4_TRANPSW = 2; //修改交易码

@@ -10,7 +10,7 @@
 			<div class="layui-inline">
 				<label class="layui-form-label">爆仓账号</label>
 				<div class="layui-input-block">
-					<input type="text" name="userId" id="userId" autocomplete="off" placeholder="请输入爆仓账号" class="layui-input" style="width: 200px;">
+					<input type="text" name="wez_userid" id="wez_userid" autocomplete="off" placeholder="请输入爆仓账号" class="layui-input" style="width: 200px;">
 				</div>
 			</div>
 			<div class="layui-inline">
@@ -20,20 +20,21 @@
 				</div>
 			</div>
 			<div class="layui-inline">
-				<label class="layui-form-label">返佣时间</label>
-				<div class="layui-input-inline" style="width: 200px;">
-					<input type="text" name="startdate" id="startdate" placeholder="请输入开始时间" autocomplete="off" class="layui-input">
-				</div>
-				<div class="layui-form-mid">-</div>
-				<div class="layui-input-inline" style="width: 200px;">
-					<input type="text" name="enddate" id="enddate" placeholder="请输入结束时间" autocomplete="off" class="layui-input">
+				<label class="layui-form-label">清零状态</label>
+				<div class="layui-input-inline">
+					<select name="wez_status" id="wez_status">
+						<option value="">请选择清零状态</option>
+						<option value="1">待清零</option>
+						<option value="2">已清零</option>
+					</select>
 				</div>
 			</div>
 			<button type="button" class="layui-btn" onclick="createTable()">查找</button>
+			<button type="button" class="layui-btn" onclick="onekeySearch()">一键查找并创建记录</button>
 		</div>
 	</form>
 	<div style="margin:20px 0px;"></div>
-	<table id="data_list" style="width: 99%;" pagination="true" title="爆仓列表"></table>
+	<table id="data_list" style="width: 99%;" pagination="false" title="爆仓列表"></table>
 @endsection
 
 @section('custom-resources')
@@ -46,10 +47,17 @@
 				{field:'wezuserbal' ,title:'{{ trans ('systemlanguage.whs_exp_bal') }}', width:100, align:'center', formatter: function (value, rowData, rowIndex) {
 				    return parseFloatToFixed(value);
 				}},
-				{field:'wezusercrt' ,title:'{{ trans ('systemlanguage.whs_exp_crt') }}', width:100, align:'center', formatter: function (value, rowData, rowIndex) {
-				    return parseFloatToFixed(value);
+				{field:'wezstatus' ,title:'{{ trans ('systemlanguage.whs_exp_status') }}', width:100, align:'center', formatter: function (value, rowData, rowIndex) {
+					return wezstatus(value);
 				}},
-				{field:'rec_crt_date' ,title:'{{ trans ('systemlanguage.whs_exp_is_zero_date') }}', width:100, align:'center',},
+				{field:'options' ,title:'{{ trans ('systemlanguage.proxy_user_options') }}' ,width:110, align:'center',formatter: function (value, rowData, rowIndex) {
+					return '<a href="javascript:;" onclick="oneKeyZero('+ rowData.wezuserid +', '+ "'"+ rowData.wezusername +"'"+', '+ rowData.wezuserbal +', '+ rowData.wezusercrt +')" class="l-btn l-btn-small l-btn-plain" style="color: blue;">' +
+						'<span class="l-btn-left l-btn-icon-left">' +
+						'<span class="l-btn-text">一键清零</span>' +
+						'<span class="l-btn-icon icon-redo">&nbsp;</span>' +
+						'</span>'+
+						'</a>';
+				}},
 			]];
 			
 			return config;
@@ -76,6 +84,79 @@
 				});
 			
 			pagerData.GridInit();
+		}
+		
+		function oneKeyZero(userId, userName, balance, crdt)
+		{
+			var index1 = openLoadShade();
+			
+			$.ajax({
+				url: route_prefix() + "/order/oneKeyZero",
+				data: {
+					userId:                 userId,
+					userName:               userName,
+					balance:                balance,
+					crdt:                   crdt,
+					_token:					"{{ csrf_token() }}",
+				},
+				dateType: "JSON",
+				type: "POST",
+				async: false,
+				success: function(data) {
+					if (data.msg == "FAIL") {
+						closeLoadShade(index1);
+						if (data.err == "crtfail") {
+							errorTips("清零失败!", "msg", data.col);
+						} else if (data.err == "zerofail") {
+							errorTips("服务器网络异常, 请联系技术人员!", "msg", data.col);
+						}
+					} else if (data.msg == "SUC") {
+						layer.msg("清零成功", {
+							time: 20000, //20s后自动关闭
+							btn: ['知道了'],
+							yes: function (index, layero) {
+								parent.layer.closeAll();
+								createTable();
+							}
+						});
+					}
+				},
+				error:function(data) {
+					closeLoadShade(index1);
+					alert("系统错误");
+				}
+			});
+		}
+		
+		function onekeySearch()
+		{
+			var index1 = openLoadShade();
+			
+			$.ajax({
+				url: route_prefix() + "/order/oneKeySearch",
+				data: {
+					_token:					"{{ csrf_token() }}",
+				},
+				dateType: "JSON",
+				type: "POST",
+				async: false,
+				success: function(data) {
+					closeLoadShade(index1);
+					if (data.msg == "FAIL") {
+						if (data.err == "zerofail") {
+							console.log(data.err);
+							layer.msg("一键查询成功, 新增 " + "<span style='color: red'>" + data.col + "</span>" + " 条数据!", {icon: 6,});
+						}
+					} else if (data.msg == "SUC") {
+						console.log(data.err);
+						layer.msg("一键查询成功, 新增" + "<span style='color: red; font-weight: 600;'>"+ data.col +"</span>" + "条数据!", {icon: 6,});
+					}
+				},
+				error:function(data) {
+					closeLoadShade(index1);
+					alert("系统错误");
+				}
+			});
 		}
 	</script>
 @endsection

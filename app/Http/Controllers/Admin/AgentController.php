@@ -15,7 +15,7 @@ use App\Model\Admin;
 use App\Model\AgentsGroup;
 use App\Model\OperationLog;
 use App\Http\Controllers\CommonController\Abstract_Mt4service_Controller;
-//
+
 class AgentController extends Abstract_Mt4service_Controller {
 
 	protected $_str_rala            = '';
@@ -91,7 +91,7 @@ class AgentController extends Abstract_Mt4service_Controller {
         }
         //统计返佣 入金 出金 ；
         foreach ($list as $key => $v) {
-            $money = DB::select('select sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as total_fy,sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as total_rj,sum(case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 then mt4_trades.PROFIT else 0 end) as total_qk from `mt4_trades` where `MT4_TRADES`.`LOGIN` =' . $v['user_id']);
+            $money = DB::select('select sum(case when mt4_trades.CMD = 6 and mt4_trades.COMMENT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as total_fy,sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%-FY" and mt4_trades.COMMENT NOT LIKE "%Adj%" then mt4_trades.PROFIT else 0 end) as total_rj,sum(case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 then mt4_trades.PROFIT else 0 end) as total_qk from `mt4_trades` where `MT4_TRADES`.`LOGIN` =' . $v['user_id']);
             $list[$key]['money'] = $money;
         }
         //计算返佣总和 出金总和 入金总和 余额总和 净值总和
@@ -139,7 +139,7 @@ class AgentController extends Abstract_Mt4service_Controller {
         $user = User::from("user as A")->leftjoin('mt4_users as B', 'A.user_id', '=', 'B.LOGIN')->whereIn('A.voided', ['1', '2'])->whereIn('A.user_status', array('0', '1', '2', '4'))->where('A.parent_id', $id)->select('A.user_id', 'A.user_name', 'A.mt4_grp', 'B.BALANCE', 'B.EQUITY', 'B.REGDATE')->orderBy('B.REGDATE', 'desc')->get();
         //统计 入金 出金 ；
         foreach ($user as $key => $v) {
-            $money = DB::select('select sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as total_rj,sum(case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 then mt4_trades.PROFIT else 0 end) as total_qk from `mt4_trades` where `MT4_TRADES`.`LOGIN` =' . $v->user_id);
+            $money = DB::select('select sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%-FY" and mt4_trades.COMMENT NOT LIKE "%Adj%"  then mt4_trades.PROFIT else 0 end) as total_rj,sum(case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 then mt4_trades.PROFIT else 0 end) as total_qk from `mt4_trades` where `MT4_TRADES`.`LOGIN` =' . $v->user_id);
             $user[$key]['money'] = $money[0];
         }
 
@@ -575,7 +575,7 @@ class AgentController extends Abstract_Mt4service_Controller {
 			$mt4 = $this->_exte_mt4_reset_user_pwd($userId, $password);
 			if (is_array($mt4) && $mt4['ret'] == '0') {
 				//更改成功，短信通知
-				$_rs = $this->_exte_send_phone_notify($userphoneNo, 'resetPassword',array('password' => $password));
+				//$_rs = $this->_exte_send_phone_notify($userphoneNo, 'resetPassword',array('password' => $password));
 			} else {
 				return response()->json([
 					'msg'       => 'FAIL',
@@ -953,6 +953,29 @@ class AgentController extends Abstract_Mt4service_Controller {
 		}
 	}
 	
+	public function againSendSms(Request $request)
+	{
+		$_user_info = $this->_exte_get_user_info($request->userId);
+	
+		$phone = substr($_user_info['phone'], (stripos($_user_info['phone'], '-') + 1));
+		
+		$_rs = $this->_exte_send_phone_notify($phone, 'registerSucInfo', array ('user_id' => $_user_info->user_id, 'password' => base64_decode ($_user_info->password)));
+		
+		if($_rs) {
+			return response()->json([
+					'msg'        => 'SUC',
+					'err'        => 'NOERR',
+					'col'        => 'NOTCOL',
+			]);
+		} else {
+			return response()->json([
+					'msg'        => 'FAIL',
+					'err'        => 'SENDFAIL',
+					'col'        => 'NOTCOL',
+			]);
+		}
+	}
+	
 	protected function get_agents_id_list($totalType, $data)
 	{
 		$query_sql = Agents::select(
@@ -979,11 +1002,11 @@ class AgentController extends Abstract_Mt4service_Controller {
 			//分页返佣，入金，出金
 			$_sumdata[$vdata['user_id']] = Mt4Trades::selectRaw('
 				/*返佣*/
-				sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as total_fy,
+				sum(case when mt4_trades.CMD = 6 and mt4_trades.COMMENT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as total_fy,
 				/*入金*/
-				sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as total_rj,
+				sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%-FY" and mt4_trades.COMMENT NOT LIKE "%Adj%" then mt4_trades.PROFIT else 0 end) as total_rj,
 				/*取款 出金*/
-				sum(case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 then mt4_trades.PROFIT else 0 end) as total_qk
+				sum(case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%Adj%" then mt4_trades.PROFIT else 0 end) as total_qk
 				')->where('MT4_TRADES.LOGIN', $vdata['user_id'])->get()->toArray();
 		}
 		
@@ -994,11 +1017,11 @@ class AgentController extends Abstract_Mt4service_Controller {
 	{
 		$_all_sumdata['fy_rj_qk'] = Mt4Trades::selectRaw('
 				/*返佣*/
-				sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as all_total_fy,
+				sum(case when mt4_trades.CMD = 6 and mt4_trades.COMMENT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as all_total_fy,
 				/*入金*/
-				sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as all_total_rj,
+				sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%-FY" and mt4_trades.COMMENT NOT LIKE "%Adj%" then mt4_trades.PROFIT else 0 end) as all_total_rj,
 				/*取款 出金*/
-				sum(case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 then mt4_trades.PROFIT else 0 end) as all_total_qk
+				sum(case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%Adj%" then mt4_trades.PROFIT else 0 end) as all_total_qk
 			')
 			->whereIn('mt4_trades.LOGIN', function ($whereIn) use ($data) {
 				$whereIn->select('agents.user_id')->from('agents')

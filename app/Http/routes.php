@@ -181,7 +181,7 @@
 	
 	//爆仓清零
 	Route::get('trades_exp_zero', 'Admin\AdminWhsExpZeroController@trades_whs_exp_zero');
-
+	Route::get('whstest', 'Admin\AdminWhsExpZeroController@whsCustListSearch');
 
 
 

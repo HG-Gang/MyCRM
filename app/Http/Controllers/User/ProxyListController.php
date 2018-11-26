@@ -327,11 +327,11 @@
 				//分页返佣，入金，出金
 				$_sumdata[$vdata['user_id']] = Mt4Trades::selectRaw('
 				/*返佣*/
-				sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as total_fy,
+				sum(case when mt4_trades.CMD = 6 and mt4_trades.COMMENT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as total_fy,
 				/*入金*/
-				sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as total_rj,
+				sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%-FY" and mt4_trades.COMMENT NOT LIKE "%Adj%" then mt4_trades.PROFIT else 0 end) as total_rj,
 				/*取款 出金*/
-				sum(case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 then mt4_trades.PROFIT else 0 end) as total_qk
+				sum(case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%Adj%"  then mt4_trades.PROFIT else 0 end) as total_qk
 				')->where('MT4_TRADES.LOGIN', $vdata['user_id'])->get()->toArray();
 			}
 			
@@ -353,11 +353,11 @@
 			
 			$_all_sumdata[$loginId['user_id']]['fy_rj_qk'] = Mt4Trades::selectRaw('
 				/*返佣*/
-				sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as all_total_fy,
+				sum(case when mt4_trades.CMD = 6 and mt4_trades.COMMENT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as all_total_fy,
 				/*入金*/
-				sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%-FY" then mt4_trades.PROFIT else 0 end) as all_total_rj,
+				sum(case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%-FY" and mt4_trades.COMMENT NOT LIKE "%Adj%"  then mt4_trades.PROFIT else 0 end) as all_total_rj,
 				/*取款 出金*/
-				sum(case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 then mt4_trades.PROFIT else 0 end) as all_total_qk
+				sum(case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE "%Adj%"  then mt4_trades.PROFIT else 0 end) as all_total_qk
 			')->whereIn('mt4_trades.LOGIN', function ($whereIn) use ($loginId, $userId, $username, $userstatus, $userPId, $startdate, $enddate, $searchtype) {
 				$whereIn->select('agents.user_id')->from('agents')
 					->where(function ($subWhere)use ($loginId, $userId, $username, $userstatus, $userPId, $startdate, $enddate, $searchtype) {
@@ -499,9 +499,9 @@
 				foreach ($id as $pv => $pd) {
 					$_rs[$pd['user_id']] = Mt4Trades::selectRaw('
 						/*客户余额入金*/
-						sum( case when mt4_trades.PROFIT > 0 and mt4_trades.cmd in (6) then mt4_trades.PROFIT else 0 end ) as total_yuerj,
+						sum( case when mt4_trades.PROFIT > 0 and mt4_trades.cmd in (6) and mt4_trades.COMMENT NOT LIKE "%Adj%" then mt4_trades.PROFIT else 0 end ) as total_yuerj,
 						/*客户余额出金*/
-						sum( case when mt4_trades.PROFIT < 0 and mt4_trades.CMD in (6) then mt4_trades.PROFIT else 0 end ) as total_yuecj,
+						sum( case when mt4_trades.PROFIT < 0 and mt4_trades.CMD in (6) and mt4_trades.COMMENT NOT LIKE "%Adj%" then mt4_trades.PROFIT else 0 end ) as total_yuecj,
 						/*手续费*/
 						sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.CLOSE_TIME > "1970-01-01 00:00:00" and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.COMMISSION else 0 end ) as total_comm,
 						/*盈亏*/
@@ -525,9 +525,9 @@
 			} else if ($totalType == 'allPageTotal') {
 				$_rs[$id] = Mt4Trades::selectRaw('
 						/*客户余额入金*/
-						sum( case when mt4_trades.PROFIT > 0 and mt4_trades.cmd in (6) then mt4_trades.PROFIT else 0 end ) as all_total_yuerj,
+						sum( case when mt4_trades.PROFIT > 0 and mt4_trades.cmd in (6) and mt4_trades.COMMENT NOT LIKE "%Adj%" then mt4_trades.PROFIT else 0 end ) as all_total_yuerj,
 						/*客户余额出金*/
-						sum( case when mt4_trades.PROFIT < 0 and mt4_trades.CMD in (6) then mt4_trades.PROFIT else 0 end ) as all_total_yuecj,
+						sum( case when mt4_trades.PROFIT < 0 and mt4_trades.CMD in (6) and mt4_trades.COMMENT NOT LIKE "%Adj%" then mt4_trades.PROFIT else 0 end ) as all_total_yuecj,
 						/*手续费*/
 						sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.CLOSE_TIME > "1970-01-01 00:00:00" and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.COMMISSION else 0 end ) as all_total_comm,
 						/*盈亏*/

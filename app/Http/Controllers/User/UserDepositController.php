@@ -25,9 +25,11 @@
 			
 			//获取当天入金规则
 			$_today_role = $this->_exte_get_system_param('DEPOSITRULE');
-			
+
+			$_user_info = $this->_exte_get_user_info($this->_user['user_id']);
+
 			return view('user.user_deposit.user_deposit_browse')->with([
-				'_user_info'        => $this->_user,
+				'_user_info'        => $_user_info,
 				'_sys_conf'         => $_sys_conf[0],
 				'_global_role'      => $_global_role[0],
 				'_today_role'       => $this->_exte_handle_deposit_role_structur_data($_today_role[0]),

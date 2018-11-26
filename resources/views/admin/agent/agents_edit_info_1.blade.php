@@ -6,7 +6,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">账户ID</label>
                 <div class="layui-input-block">
-                    <input type="text" name="userId" id="userId" value="{{ $ag_info['user_id'] }}" autocomplete="off" placeholder="请输入账户ID" class="layui-input" readonly="readonly" style="width: 200px; border: 1px solid #ccc; background: #E6E6FA !important; color: #0066ff; cursor:text;">
+                    <input type="text" name="userId" id="userId" value="{{ $ag_info['user_id'] }}" autocomplete="off" placeholder="请输入账户ID" class="layui-input" readonly="readonly" style="width: 120px; border: 1px solid #ccc; background: #E6E6FA !important; color: #0066ff; cursor:text;">
                 </div>
             </div>
             <div class="layui-inline">
@@ -22,7 +22,6 @@
                 </div>
             </div>
         </div>
-
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">身份证号</label>
@@ -141,7 +140,6 @@
                 </div>
             </div>
         </div>
-
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">代理级别</label>
@@ -245,9 +243,17 @@
             </div>
         </div>
         <div class="layui-form-item">
-            <div class="layui-input-block">
-                <button type="button" class="layui-btn" onclick="agentsSave_1('{{ csrf_token() }}')">确定</button>
             </div>
+	        <div class="layui-inline">
+	            <div class="layui-input-block">
+	                <button type="button" class="layui-btn" onclick="agentsSave_1('{{ csrf_token() }}')">确定</button>
+	            </div>
+	        </div>
+	        <div class="layui-inline">
+		        <div class="layui-input-block" style="margin-left: 50px;">
+			        <button type="button" class="layui-btn" id="sendSms" onclick="againSendSMS('{{ $ag_info['user_id'] }}' ,'{{ csrf_token() }}')">发送短信</button>
+		        </div>
+	        </div>
         </div>
     </form>
 @endsection

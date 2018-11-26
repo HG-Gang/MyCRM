@@ -73,7 +73,7 @@
 		}
 		
 		function DbClickEditAccountInfo(rowIndex, rowData) {
-			if ("{{ $role }}" == 1 || "{{ $role }}" == 3) {
+			if ("{{ $role }}" == 1 || "{{ $role }}" == 2 || "{{ $role }}" == 3) {
 				show_certified_detail(rowData.user_id);
 			} else {
 				console.log("没有可查看的信息!");

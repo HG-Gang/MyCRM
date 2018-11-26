@@ -110,7 +110,7 @@
 				
 				//七日内的返佣
 				$deposit[$i]['fanYong'] = Mt4Trades::selectRaw ("
-					sum( case when mt4_trades.PROFIT > 0 AND mt4_trades.CMD = 6 AND mt4_trades.COMMENT LIKE '%-FY' THEN mt4_trades.PROFIT ELSE 0 END ) as todayRebateTotal
+					sum( case when mt4_trades.CMD = 6 AND mt4_trades.COMMENT LIKE '%-FY' THEN mt4_trades.PROFIT ELSE 0 END ) as todayRebateTotal
 				")->where(function ($query) use ($date, $i) {
 					$query->whereBetween('mt4_trades.MODIFY_TIME', [$date[$i] . ' 00:00:00', $date[$i] . ' 23:59:59']);
 				})->get()->toArray();
@@ -176,7 +176,7 @@
 			
 			//累计返佣
 			$rebateTotal = Mt4Trades::selectRaw ("
-					sum( case when mt4_trades.PROFIT > 0 AND mt4_trades.CMD = 6 AND mt4_trades.COMMENT LIKE '%-FY' THEN mt4_trades.PROFIT ELSE 0 END ) as rebateTotal
+					sum( case when mt4_trades.CMD = 6 AND mt4_trades.COMMENT LIKE '%-FY' THEN mt4_trades.PROFIT ELSE 0 END ) as rebateTotal
 				")->where(function ($subWhere) {
 					$this->_exte_set_search_condition($subWhere, array('user_id' => $this->_agentsIdIndex));
 				})->get()->toArray();

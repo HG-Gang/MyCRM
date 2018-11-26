@@ -137,11 +137,11 @@
 			foreach ($id_list as $key => $vdata) {
 				$_one_sumdata[$vdata['user_id']] = Mt4Trades::selectRaw ("
 					/*代理商余额入金*/
-					sum( case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE '%-FY' then mt4_trades.PROFIT else 0 end ) as total_yuerj,
+					sum( case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE '%-FY' and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.PROFIT else 0 end ) as total_yuerj,
 					/*代理商余额出金*/
-					sum( case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 then mt4_trades.PROFIT else 0 end ) as total_yuecj,
+					sum( case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.PROFIT else 0 end ) as total_yuecj,
 					/*代理商返佣金额*/
-					sum( case when mt4_trades.PROFIT > 0 AND mt4_trades.CMD = 6 AND mt4_trades.COMMENT LIKE '%-FY' THEN mt4_trades.PROFIT ELSE 0 END ) as total_rebate,
+					sum( case when mt4_trades.CMD = 6 AND mt4_trades.COMMENT LIKE '%-FY' THEN mt4_trades.PROFIT ELSE 0 END ) as total_rebate,
 					/*代理商盈亏*/
 					sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.PROFIT else 0 end ) as total_profit,
 					/*代理商手续费*/
@@ -205,11 +205,11 @@
 			foreach ($id_list as $key => $vdata) {
 				$_one_sumdata[$vdata['user_id']]['all_total'] = Mt4Trades::selectRaw ("
 					/*代理商余额入金*/
-					sum( case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE '%-FY' then mt4_trades.PROFIT else 0 end ) as all_total_yuerj,
+					sum( case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE '%-FY' and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.PROFIT else 0 end ) as all_total_yuerj,
 					/*代理商余额出金*/
-					sum( case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 then mt4_trades.PROFIT else 0 end ) as all_total_yuecj,
+					sum( case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.PROFIT else 0 end ) as all_total_yuecj,
 					/*代理商返佣金额*/
-					sum( case when mt4_trades.PROFIT > 0 AND mt4_trades.CMD = 6 AND mt4_trades.COMMENT LIKE '%-FY' THEN mt4_trades.PROFIT ELSE 0 END ) as all_total_rebate,
+					sum( case when mt4_trades.CMD = 6 AND mt4_trades.COMMENT LIKE '%-FY' THEN mt4_trades.PROFIT ELSE 0 END ) as all_total_rebate,
 					/*代理商盈亏*/
 					sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.PROFIT else 0 end ) as all_total_profit,
 					/*代理商手续费*/

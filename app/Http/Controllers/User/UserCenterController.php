@@ -457,7 +457,7 @@
 			$userverfcode   = $request->userverfcode;
 			$_modules       = '86';
 			$_table         = $this->_exte_get_table_obj($this->_user['user_id']);
-			$_subUser       = DataList::where('user_id', $this->_user['user_id'])->where('voided', '1')->whereIn('user_status', array('0', '1', '2', '4'))->count();
+			$_subUser       = DataList::where('parent_id', $this->_user['user_id'])->where('voided', '1')->whereIn('user_status', array('0', '1', '2', '4'))->count();
 
 			//先获得当前客户余额和持仓总量及检查是否有正在等待处理的出金申请订单
 			$_bal = Mt4Users::select('LOGIN', 'NAME', 'BALANCE', 'CREDIT')->where('LOGIN', $this->_user['user_id'])->get()->toArray();

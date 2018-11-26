@@ -61,7 +61,7 @@
 			Route::get('agents/agents_edit_info/{uid}', 'Admin\AgentController@agents_edit_info');
 			Route::post('agents/agents_edit_save', 'Admin\AgentController@agents_edit_save');
 			Route::post('agents/agentsListSearch', 'Admin\AgentController@agentsListSearch');
-			
+			Route::post('send/againSendSms', 'Admin\AgentController@againSendSms');
 			###查看直属客户
 			Route::get('customer/{user_id?}', 'Admin\AgentController@CustomerList')->where('user_id', '[0-9]+');
 			###编辑代理商
@@ -88,6 +88,8 @@
 			Route::post('order/realCommissionListSearch', 'Admin\AdminRealCommissionController@realCommissionListSearch');
 			###爆仓列表
 			Route::get('order/whs_exp_zero_list', 'Admin\AdminWhsExpZeroController@whs_exp_zero_list');
+			//Route::post('order/whsCustListSearch', 'Admin\AdminWhsExpZeroController@whsCustListSearch');
+			Route::post('order/oneKeySearch', 'Admin\AdminWhsExpZeroController@oneKeySearch');
 			Route::post('order/whsExpZeroListSearch', 'Admin\AdminWhsExpZeroController@whsExpZeroListSearch');
 			#################end##################################
 			################客户管理##############################

@@ -323,9 +323,9 @@
 				'parent_id' => '637001',
 			);*/
 			//$reg = $this->_exte_mt4_verify_password(637001, 'abcd1234');
-			//$reg1 = $this->_exte_get_user_info(200001);
+			//$reg1 = $this->_exte_get_user_info(637001);
 			//$reg = $this->_exte_sync_mt4_reigster2($reg1);
-			//$_email = $this->_exte_send_email_notify('yyc_liang@qq.com', '注册成功', $reg1, 'registerSuc', 'verifyphone');
+			//$_email = $this->_exte_send_email_notify('2216257617@qq.com', '注册成功', $reg1, 'registerSuc', 'verifyphone');
 			//dd($_email);
 			//dd(json_decode($ret['Result'], true));
 			//$deo1 = $this->_exte_mt4_withdrawal_amount(6000256, 50000, 'Withdraw-Adj');
@@ -341,8 +341,8 @@
 			//$verify_psw = $this->_exte_mt4_verify_password($this->_user['user_id'], $password);
 			//dd($this->_exte_get_mt4_grpId('AGJ-B-0'));exit();
 			/*$name = array(
-				0 => '夏宇泽', 1 => '钟书豪', 2 => '钟天耀', 3 => '汪明婕', 4 => '汪皓轩',
-				5 => '段文曼', 6 => '秦紫晴', 7 => '武佩鸿', 8 => '黎昱涵', 9 => '黎若馨',
+				0 => '戴兴智', 1 => '戴青竹', 2 => '祁铭皓', 3 => '祁瑞', 4 => '熊楷舜',
+				5 => '熊博婕',// 6 => '秦紫晴', 7 => '武佩鸿', 8 => '黎昱涵', 9 => '黎若馨',
 				//10 => '王皓月', 11 => '王文田', 12 => '王玥婷', 13 => '王博贤', 14 => '王翠楠',
 				//15 => '张月婷', 16 => '张雨杨', 17 => '张昊然', 18 => '张鑫雨', 19 => '张馨怡',
 				//20 => '刘晓婷', 21 => '刘益冉', 22 => '刘名扬', 23 => '刘家洋', 24 => '刘易轩',
@@ -353,7 +353,7 @@
 				3 => 210000,
 			);
 			for ($i = 0; $i <= 9; $i ++) {
-				$_rs[$i] = Agents::create([
+				$_rs[$i] = User::create([
 					'user_name'             => $name[$i],
 					'password'              => base64_encode('abcd123'),
 					'sex'                   => ($i % 2 == 0) ? '男' : '女',
@@ -379,7 +379,7 @@
 					'bank_status'           => '0',
 					'IDcard_status'			=> '0',
 					'cust_lvg'              => 100,
-					'rights'                => 70, //权益比例
+					'rights'                => 0, //权益比例
 					'cycle'                 => 1,//结算周期
 					'voided'                => '1', //注册后允许登录
 					'rec_crt_date'          => date('Y-m-d H:i:s'),

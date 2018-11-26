@@ -5,7 +5,15 @@
 @endsection
 
 @section('content')
-    {{--@if($_user_info['IDcard_status'] != '2')
+    {{--@if(true)
+        <div class="not-allow_withdrawals">
+            <span><img src="{{URL::asset('/img/not_allowed_withdrawals.png') }}" style="margin-top: 20px;"></span>
+            <span class="span-text-bottom">
+                <h2>很抱歉，入金功能正在进行维护升级中....，预计维护到2018年11月20日18:00后恢复正常.</h2>
+                <h2>如有疑问, 请联系客服</h2>
+            </span>
+        </div>
+    @if($_user_info['IDcard_status'] != '2')
         <div class="not-allow_withdrawals">
             <span><img src="{{URL::asset('/img/not_allowed_withdrawals.png') }}" style="margin-top: 20px;"></span>
             <span class="span-text-bottom">
@@ -18,6 +26,14 @@
             <span><img src="{{URL::asset('/img/not_allowed_withdrawals.png') }}" style="margin-top: 20px;"></span>
             <span class="span-text-bottom">
                 <h2>很抱歉，系统设定为不允许入金</h2>
+                <h2>如有疑问, 请联系客服</h2>
+            </span>
+        </div>
+    @elseif($_user_info['enable_readonly'] == 1)
+        <div class="not-allow_withdrawals">
+            <span><img src="{{URL::asset('/img/not_allowed_withdrawals.png') }}" style="margin-top: 20px;"></span>
+            <span class="span-text-bottom">
+                <h2>很抱歉，您的账户已被设定为不能入金</h2>
                 <h2>如有疑问, 请联系客服</h2>
             </span>
         </div>
@@ -298,7 +314,7 @@
     @endif
     <div class="deposit-matter">
         <p style="margin-bottom:0px; height: 32px; line-height: 32px;color:red; font-weight: 600;font-size:14px;">入金注意事项</p>
-        <p>1.通道一单笔入金最高20万人民币{{--，通道二单笔入金最高18万人民币--}}。</p>
+        <p>1.通道一单笔入金最高10万人民币{{--，通道二单笔入金最高18万人民币--}}。</p>
        {{-- <p>1.通道一单笔入金最高18万人民币。</p>--}}
         <p>2.请确保以上数据完整及属实，如有不全或遗漏，会影响到帐时间。</p>
         <p>3.客户是采用人民币入金美元到账，汇率按照工作日9:30分的中国银行(香港)外汇牌价现汇买卖价作为存取款汇率，本公司保留更改汇率的最终决定权。</p>
@@ -349,8 +365,8 @@
                     errorTips("存款金额单笔最低700RMB", "msg", "deposit_amount");
                 } else if (deposit_amount != "" && deposit_amount > 0 && deposit_amount > 200001 && $("#pay_channel").val() == "tongdaoYI") {
                     errorTips("通道一存款金额单笔最高20万RMB", "msg", "deposit_amount");
-                } else if (deposit_amount != "" && deposit_amount > 0 && deposit_amount > 180000 && $("#pay_channel2").val() == "tongdaoER") {
-                    errorTips("通道二存款金额单笔最高18万RMB", "msg", "deposit_amount");
+                } else if (deposit_amount != "" && deposit_amount > 0 && deposit_amount > 100001 && $("#pay_channel2").val() == "tongdaoER") {
+                    errorTips("通道一存款金额单笔最高10万RMB", "msg", "deposit_amount");
                 } else if (deposit_amount != "" && !(Number(deposit_amount) % 100 == 0)) {
                     errorTips("存款金额单笔必须是100的整倍数", "msg", "deposit_amount");
                 } /*else if ((!$("input:radio[name='gateway_bank']").is(":checked")) && $("#pay_channel").val() == "tongdaoYI") {

@@ -318,9 +318,9 @@
 						/*手续费*/
 						abs( sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.commission else 0 end ) ) as total_comm,
 						/*客户余额入金*/
-						sum( case when mt4_trades.profit > 0 and mt4_trades.CMD in (6) then mt4_trades.profit else 0 end ) as total_yuerj,
+						sum( case when mt4_trades.profit > 0 and mt4_trades.CMD in (6) and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.profit else 0 end ) as total_yuerj,
 						/*客户余额出金*/
-						sum( case when mt4_trades.profit < 0 and mt4_trades.CMD in (6) then mt4_trades.profit else 0 end ) as total_yuecj,
+						sum( case when mt4_trades.profit < 0 and mt4_trades.CMD in (6) and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.profit else 0 end ) as total_yuecj,
 						/*手数*/
 						sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.volume else 0 end ) as total_volume,
 						/*利息*/
@@ -382,9 +382,9 @@
 					/*总手续费*/
 					abs( sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.commission else 0 end ) ) as total_comm,
 					/*客户总余额入金*/
-					sum( case when mt4_trades.profit > 0 and mt4_trades.CMD in (6) then mt4_trades.profit else 0 end ) as total_yuerj,
+					sum( case when mt4_trades.profit > 0 and mt4_trades.CMD in (6) and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.profit else 0 end ) as total_yuerj,
 					/*客户总余额出金*/
-					sum( case when mt4_trades.profit < 0 and mt4_trades.CMD in (6) then mt4_trades.profit else 0 end ) as total_yuecj,
+					sum( case when mt4_trades.profit < 0 and mt4_trades.CMD in (6) and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.profit else 0 end ) as total_yuecj,
 					/*总手数 == 总交易量*/
 					sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.volume else 0 end ) as total_volume,
 					/*总利息*/

@@ -144,7 +144,7 @@
 						}
 					}},
 				{field: 'rec_crt_date', title: '{{ trans ('systemlanguage.proxy_rec_crt_date') }}', width: 100, align: 'center',},
-				{field: 'comm_trans', title: '{{ trans ('systemlanguage.proxy_comm_trans') }}', width: 100, align: 'center', formatter: function (value, rowData, rowIndex) {
+				/*{field: 'comm_trans', title: '{{ trans ('systemlanguage.proxy_comm_trans') }}', width: 100, align: 'center', formatter: function (value, rowData, rowIndex) {
 					if (rowData.parent_id == '{{ $_user_info['user_id'] }}') {
 						//是直属客户
 						return "<font color='blue' onclick='agentsCommissionTransfer(" + rowData.user_id + ")'>" + '转给TA' + "</font>";
@@ -153,7 +153,7 @@
 					}
 					
 					return "======";
-				}},
+				}},*/
 			]];
 			
 			return config;

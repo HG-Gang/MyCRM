@@ -124,9 +124,16 @@
             </div>
         </div>
         <div class="layui-form-item">
-            <div class="layui-input-block">
-                <button type="button" class="layui-btn" onclick="custSave_2('{{ csrf_token() }}')">确定</button>
+            <div class="layui-inline">
+	            <div class="layui-input-block">
+	                <button type="button" class="layui-btn" onclick="custSave_2('{{ csrf_token() }}')">确定</button>
+	            </div>
             </div>
+	        <div class="layui-inline">
+		        <div class="layui-input-block" style="margin-left: 50px;">
+			        <button type="button" class="layui-btn" id="sendSms" onclick="againSendSMS('{{ $_acc_info['user_id'] }}' ,'{{ csrf_token() }}')">发送短信</button>
+		        </div>
+	        </div>
         </div>
     </form>
 @endsection
