@@ -51,12 +51,17 @@
 					return wezstatus(value);
 				}},
 				{field:'options' ,title:'{{ trans ('systemlanguage.proxy_user_options') }}' ,width:110, align:'center',formatter: function (value, rowData, rowIndex) {
-					return '<a href="javascript:;" onclick="oneKeyZero('+ rowData.wezuserid +', '+ "'"+ rowData.wezusername +"'"+', '+ rowData.wezuserbal +', '+ rowData.wezusercrt +')" class="l-btn l-btn-small l-btn-plain" style="color: blue;">' +
-						'<span class="l-btn-left l-btn-icon-left">' +
-						'<span class="l-btn-text">一键清零</span>' +
-						'<span class="l-btn-icon icon-redo">&nbsp;</span>' +
-						'</span>'+
-						'</a>';
+					if (rowData.wezstatus == "2") {
+						return "=======";
+					} else {
+						return '<a href="javascript:;" onclick="oneKeyZero('+ rowData.wezuserid +', '+ "'"+ rowData.wezusername +"'"+', '+ rowData.wezuserbal +', '+ rowData.wezusercrt +')" class="l-btn l-btn-small l-btn-plain" style="color: blue;">' +
+								'<span class="l-btn-left l-btn-icon-left">' +
+								'<span class="l-btn-text">一键清零</span>' +
+								'<span class="l-btn-icon icon-redo">&nbsp;</span>' +
+								'</span>'+
+								'</a>';
+					}
+
 				}},
 			]];
 			
@@ -111,11 +116,12 @@
 							errorTips("服务器网络异常, 请联系技术人员!", "msg", data.col);
 						}
 					} else if (data.msg == "SUC") {
+						closeLoadShade(index1);
 						layer.msg("清零成功", {
 							time: 20000, //20s后自动关闭
 							btn: ['知道了'],
 							yes: function (index, layero) {
-								parent.layer.closeAll();
+								layer.closeAll();
 								createTable();
 							}
 						});

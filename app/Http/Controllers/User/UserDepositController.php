@@ -28,12 +28,21 @@
 
 			$_user_info = $this->_exte_get_user_info($this->_user['user_id']);
 
-			return view('user.user_deposit.user_deposit_browse')->with([
-				'_user_info'        => $_user_info,
-				'_sys_conf'         => $_sys_conf[0],
-				'_global_role'      => $_global_role[0],
-				'_today_role'       => $this->_exte_handle_deposit_role_structur_data($_today_role[0]),
-			]);
+			if($this->_user['user_id'] == 637001) {
+				return view('user.user_deposit.user_deposit_browse_test')->with([
+						'_user_info'        => $_user_info,
+						'_sys_conf'         => $_sys_conf[0],
+						'_global_role'      => $_global_role[0],
+						'_today_role'       => $this->_exte_handle_deposit_role_structur_data($_today_role[0]),
+				]);
+			} else {
+				return view('user.user_deposit.user_deposit_browse')->with([
+						'_user_info'        => $_user_info,
+						'_sys_conf'         => $_sys_conf[0],
+						'_global_role'      => $_global_role[0],
+						'_today_role'       => $this->_exte_handle_deposit_role_structur_data($_today_role[0]),
+				]);
+			}
 		}
 		
 		public function deposit_request (Request $request) {
@@ -46,7 +55,7 @@
 			$pay_gateway2           = $request->pay_gateway2; //支付银行
 			$pay_channel2           = $request->pay_channel2; //支付接口名字
 			$gateway_bank           = $request->gateway_bank;
-			
+
 			$act_amt_USD            = number_format(($deposit_amt / $deposit_rate), '2', '.', '');
 			//return "暂不支持在线支付.";
 			if (!empty($pay_channel2) && $pay_channel2 == 'tongdaoER') {
@@ -59,7 +68,7 @@
 				'deposit_act_amt'   => $act_amt_USD,
 				'pay_gateway'       => $pay_gateway2,
 				'pay_channel'       => $pay_channel,
-				'pay_channel2'      => 'tongdaoER',//$pay_channel2,
+				'pay_channel2'      => $pay_channel2,
 			);
 			
 			$PayConf = new PayConfigController();

@@ -24,6 +24,7 @@
 		'proxy_fy_money'                                                    => '返佣',
 		'proxy_rj_money'                                                    => '入金',
 		'proxy_qk_money'                                                    => '出金',
+		'proxy_mt4MarginLevel'                                              => '预付款比例',
 		'proxy_rec_crt_date'                                                => '开户日期',
 		'proxy_comm_trans'                                                  => '佣金转户',
 		'proxy_agents_lvg'                                                  => '代理级别',
@@ -256,4 +257,19 @@
 		'history_loginIddesc'         	                                   => '登录地点',
 		'history_loginIdIp'         	                                   => '登录IP',
 		'history_date'         	                                           => '登录时间',
+		
+		//IP风险
+		'fengXian_loginId'         	                                       => '登录账户',
+		'fengXian_loginName'                                               => '账户姓名',
+		'fengXian_loginpid'                                                => '上级ID',
+		'fengXian_logincrt_date'                                           => '创建日期',
+		'fengXian_loginclose'                                              => '平仓单量',
+		'fengXian_loginopen'                                               => '持仓单量',
+		'fengXian_loginamount_rj'                                          => '入金汇总',
+		'fengXian_loginamount_cj'                                          => '出金汇总',
+		'fengXian_loginIp'         	                                       => '风险IP',
+		'fengXian_loginIddesc'         	                                   => 'IP地址',
+		'fengXian_loginInfo'                                               => '账户信息',
+		'fengXian_loginIdCount'         	                               => '登录次数',
+		'fengXian_loginDate'                                               => '登录日期'
 	];

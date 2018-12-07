@@ -44,21 +44,22 @@
 			$_retrun_data['attach']	        = $request->attach; //附加数据，在查询 API 和支付通知中原样返回，可作为自定义参数使用。
 			$_retrun_data['charset']		= $request->charset; //字符集 UTF-8*/
 			
-			$_retrun_data['outOrderId']		= $request->sn;//商户订单号
-			$_retrun_data['orderId']		= $request->merid; //商户号
-			$_retrun_data['serialNo']		= $request->serialNo; //平台流水号
-			$_retrun_data['amount']		    = $request->money;
-			$_retrun_data['orderStatus']	= $request->code;
+			$_retrun_data['outOrderId']		= $request->sdorderno;//商户订单号
+			$_retrun_data['orderId']		= $request->customerid; //商户号
+			$_retrun_data['serialNo']		= $request->sdpayno; //平台流水号
+			$_retrun_data['amount']		    = $request->total_fee;
+			$_retrun_data['orderStatus']	= $request->status; //订单状态
 			$_retrun_data['sign']		    = $request->sign;
-			$_retrun_data['channel']		= $request->channel;
+			$_retrun_data['channel']		= $request->paytype; //支付类型
 			$_retrun_data['data']           = $request->all();
 			
 			$this->pay_debugfile($_retrun_data, '支付异步回调', 'PayPostRetrun');
 			
-			if ($_retrun_data['orderStatus'] == 200) {
+			if ($_retrun_data['orderStatus'] == '1') {
 				if ($this->check_orderno_in_mt4_status ($_retrun_data)) {
 					echo 'SUCCESS';
 				} else {
+					$_retrun_data['orderStatus'] = 200;
 					$_rs = $this->_exte_pay_success_sync_mt4_deposit($_retrun_data, $request);
 				}
 			} else {
@@ -205,7 +206,7 @@
 							if ($_retrun_data['orderStatus'] == 200) {
 								//一切正常 调用完成逻辑  订单号 金额， 开始同步MT4
 								$sync_mt4 = $this->_exte_mt4_deposit_amount($uid, $trades_info['dep_act_amount'], $cmt);
-								echo 'SUCCESS';
+								echo ($_retrun_data['orderId'] == "10952") ? 'success' : 'SUCCESS';
 								if(is_array($sync_mt4) && $sync_mt4['ret'] == '0') {
 									$phone              = substr($_rs['phone'], (stripos($_rs['phone'], '-') + 1));
 									$data['amt']        = $trades_info['dep_act_amount'];

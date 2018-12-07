@@ -136,6 +136,13 @@
 					}
 					return parseFloatToFixed(value);
 				}},
+				{field:'mt4MarginLevel' ,title:'{{ trans ('systemlanguage.proxy_mt4MarginLevel') }}' ,width:100 ,align:'center', formatter: function (value, rowData, rowIndex) {
+					if (rowData.user_name) {
+						return mt4MarginLevelFormat(value);
+					} else {
+						return "";
+					}
+				}},
 				{field:'rights' ,title:'{{ trans ('systemlanguage.proxy_agents_commp_rights') }}', width:100, align:'center', formatter: function (value, rowData, rowIndex) {
 						if (rowData.user_name) {
 							return rowData.commprop + ' / ' + value;

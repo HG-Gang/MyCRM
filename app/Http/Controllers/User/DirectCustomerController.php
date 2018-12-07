@@ -41,7 +41,7 @@
 			//查出当前客户最近15日内的登录历史记录
 			$data = array(
 				'user_id'   => $uid,
-				'startdate' => date('Y-m-d', strtotime('-2 weeks')),
+				'startdate' => date('Y-m-d', strtotime('-4 weeks')),
 				'enddate'   => date('Y-m-d'),
 			);
 			
@@ -79,14 +79,17 @@
 					$_rs[$key]['total_for_exca']          = $_sumdata[$_info['user_id']]['total_for_exca'];
 					$_rs[$key]['total_crud_oil']          = $_sumdata[$_info['user_id']]['total_crud_oil'];
 					$_rs[$key]['total_index']             = $_sumdata[$_info['user_id']]['total_index'];
-					$_rs[$key]['total_net_worth']         = $_sumdata[$_info['user_id']]['total_net_worth'];;
+					$_rs[$key]['total_net_worth']         = $_sumdata[$_info['user_id']]['total_net_worth'];
+					$_rs[$key]['mt4MarginLevel']         = number_format($_rs[$key]['mt4MarginLevel'], '2', '.', '');
+
 				}
 				
 				$result['rows'] = $_rs;
 				$result['total'] = $this->get_current_agents_direct_id_list('count', $request);
 				$result['footer'] = [[
-					'mt4_login'           => '总计',
+					'mt4_login'         => '总计',
 					'user_name'         => '',
+					'mt4MarginLevel'    => '',
 					'mt4_balance'       => $_search_sumdata['search_total_bal'],
 					'mt4_equity'        => $_search_sumdata['search_total_eqy'],
 					'total_yuerj'       => $_search_sumdata['search_total_yuerj'],
@@ -212,8 +215,8 @@
 				user.trans_mode, user.mt4_code, user.user_money, user.cust_eqy, user.mt4_grp,
 				user.user_status, user.voided, user.IDcard_status, user.bank_status,
 				mt4_users.LOGIN as mt4_login, mt4_users.NAME as mt4_name, mt4_users.BALANCE as mt4_balance,
-				mt4_users.EQUITY as mt4_equity, mt4_users.REGDATE as mt4_regdate
-			")->join('mt4_users', 'mt4_users.LOGIN', ' = ', 'user.user_id')
+				mt4_users.EQUITY as mt4_equity, mt4_users.REGDATE as mt4_regdate, mt4_users.MARGIN_LEVEL as mt4MarginLevel
+			")->leftjoin('mt4_users', 'mt4_users.LOGIN', ' = ', 'user.user_id')
 			->whereIn('user.voided', array ('1', '2'))->whereIn('user.user_status', array('0', '1', '2', '4'))
 			->where('user.parent_id', $loginId['user_id'])
 			->where(function ($subWhere) use ($loginId, $userId, $username, $userstatus, $startdate, $enddate) {

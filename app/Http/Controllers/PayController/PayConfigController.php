@@ -125,15 +125,15 @@
 		}
 		
 		public function merId () {
-			return $this->_merId = '180022';
+			return $this->_merId = '';
 		}
 		
 		public function merId2 () {
-			return $this->_merId2 = '1806';
+			return $this->_merId2 = '';
 		}
 		
 		public function key () {
-			return $this->_key = '0c9985b675b65655ef1536bfede0a08d';
+			return $this->_key = '5d975b1e0c7a8e6b467b841591cdd2dd40f9b968';
 		}
 		
 		public function key2 () {
@@ -141,7 +141,7 @@
 		}
 		
 		public function serverUrl () {
-			return $this->_serverUrl = 'http://pay.jbwy666.com/Pay/yunPay/UNPay.php';
+			return $this->_serverUrl = 'http://pay.yundunbaopay.com/apisubmit';
 		}
 		
 		public function serverUrl2 () {
@@ -154,32 +154,31 @@
 		
 		public function form_init ($param)
 		{
-			/*if ($param['pay_channel'] == 'tongdaoYI') {
-				$order = array(
-					'appId'             =>$this->merId(),
-					'tradeNo'           => $this->orderNoPrefix() . $this->orderNo(). '-' . $param['userId'], //date('YmdHis') . rand(1234, 9999),$this->orderNoPrefix() . $this->orderNo(). '-' . $param['userId'],//商户平台的订单号，确保唯一性
-					'amount'            => $param['deposit_amt'] * 100, //支付金额，单位分,无小数点
-					'title'             => $param['userId'] . '-CZ',//商户展示名称
-					'remark'            => $param['userId'] . '-CZ',
-					'clientIp'          => getClientId(),
-					'sign'              => '',//签名
-					'redirectUrl'       => $this->returnUrl(),//支付结果同步通知地址
-					'notifyUrl'         => $this->notifyUrl(),//支付结果异步通知地址
-					'terminal'          => getUserTerminal(),//支付用户的终端设备，PC,H5,ANDROID,IOS
-					'outUserId'         => $param['userId'],
+			if ($param['pay_channel'] == 'tongdaoYI') {
+				$data = array(
+					'version'               =>'1.0',
+					'customerid'            => $this->merId(), //商户平台的订单号，确保唯一性
+					'sdorderno'             => $this->orderNoPrefix() . $this->orderNo(). '-' . $param['userId'],//商户订单号
+					'total_fee'             => number_format($param['deposit_amt'], '2', '.', ''), //支付金额，单位分,无小数点
+					'paytype'               => 'usdt',
+					'returnurl'             => $this->returnUrl(),//支付结果同步通知地址
+					'notifyurl'             => $this->notifyUrl(),//支付结果异步通知地址
+					'remark'                => $param['userId'] . '-CZ',//商户展示名称
+					'bankcode'              => '',
+					'get_code'              => '0',
 				);
-				$data                  = array();
+				/*$data                  = array();
 				$data['merid']         = $this->merId();//商户号
 				$data['sn']            = $this->orderNo(). '-' . $param['userId'];//订单号
 				$data['money']         = $param['deposit_amt']; //金额
 				$data['subject']       = $param['userId'] . '-CZ';//商品描述
 				$data['urlCallback']   = $this->notifyUrl();//异步通知地址
-				$data['extra']         = $param['userId'] . '-CZ';//备注
+				$data['extra']         = $param['userId'] . '-CZ';//备注*/
 				//2.支付参数签名
-				$data['sign']          = $this->SignArray($data, $this->key());
+				$data['sign']          = md5('version='.$data['version'].'&customerid='.$data['customerid'].'&total_fee='.$data['total_fee'].'&sdorderno='.$data['sdorderno'].'&notifyurl='.$data['notifyurl'].'&returnurl='.$data['returnurl'].'&'.$this->key());
 				//3.将支付参数转为字符串
-				$paramsStr              = $this->ToUrlParams($data);
-			} else*/ if ($param['pay_channel2'] == 'tongdaoER') {
+			//	$paramsStr              = $this->ToUrlParams($data);
+			} else if ($param['pay_channel2'] == 'tongdaoER') {
 				$data = array(
 					'mch_id'            => $this->merId2(),
 					'pay_type'          => 'unipay.web',
@@ -228,15 +227,14 @@
 			
 			//dd($_t);exit();
 			//本地初始记录当前订单信息
-			/*if ($param['pay_channel'] == 'tongdaoYI') {
+			if ($param['pay_channel'] == 'tongdaoYI') {
 				$num = DepositRecordLog::create([
 					'dep_mchId'                     => $this->merId(), //商户号
-					'dep_channel'                   => ($param['pay_channel'] == 'tongdaoYI') ? 'UNPAY' : 'Other', //支付类型
+					'dep_channel'                   => ($param['pay_channel'] == 'tongdaoYI') ? 'YunDunBao' : 'Other', //支付类型
 					'dep_body'                      => $param['userId'] . '-CZ',  //备注
-					'dep_outTrande'                 => $data['sn'], //订单号，唯一
+					'dep_outTrande'                 => $data['sdorderno'], //订单号，唯一
 					'dep_amount'                    => $param['deposit_amt'], //实际支付
 					'dep_act_amount'                => $param['deposit_act_amt'], //实际存款
-					//  'dep_transTime'                 => $param['transTime'], //交易时间
 					'dep_status'                    => '01', //默认支付失败
 					'voided'                        => '01', //默认MT4没有处理次订单
 					'rec_crt_user'                  => $param['userId'],
@@ -244,17 +242,14 @@
 					'rec_crt_date'                  => date('Y-m-d H:i:s'),
 					'rec_upd_date'                  => date('Y-m-d H:i:s'),
 				]);
-			} else */if ($param['pay_channel2'] == 'tongdaoER') {
+			} else if ($param['pay_channel2'] == 'tongdaoER') {
 				$num = DepositRecordLog::create([
-					// 'dep_status'                    => $param['status'], //订单状态
-					// 'dep_outChannelNo'              => $param['outChannelNo'], 上游渠道订单号， 唯一
 					'dep_mchId'                     => $this->merId2(), //商户号
-					'dep_channel'                   => ($param['pay_channel'] == 'tongdaoYI') ? 'UNPAY2' : 'QICAIHONG', //支付类型
+					'dep_channel'                   => ($param['pay_channel'] == 'tongdaoER') ? 'UNPAY2' : 'QICAIHONG', //支付类型
 					'dep_body'                      => $param['userId'] . '-CZ',  //备注
 					'dep_outTrande'                 => $data['order_id'], //订单号，唯一
 					'dep_amount'                    => $param['deposit_amt'], //实际支付
 					'dep_act_amount'                => $param['deposit_act_amt'], //实际存款
-					//  'dep_transTime'                 => $param['transTime'], //交易时间
 					'dep_status'                    => '01', //默认支付失败
 					'voided'                        => '01', //默认MT4没有处理次订单
 					'rec_crt_user'                  => $param['userId'],
@@ -269,20 +264,20 @@
 			} else {
 				//4.发送支付请求
 				
-				/*if ($param['pay_channel'] == 'tongdaoYI') {
-					$this->deposit_request_post($order);
-					header("Content-type:text/html;charset=utf-8");
-					header("Location:".$this->serverUrl().'?'.$paramsStr);exit;
-				} else*/ if ($param['pay_channel2'] == 'tongdaoER') {
+				if ($param['pay_channel'] == 'tongdaoYI') {
+					$this->deposit_request_post($data, $this->serverUrl());
+					//header("Content-type:text/html;charset=utf-8");
+					//header("Location:".$this->serverUrl().'?'.$paramsStr);exit;
+				} else if ($param['pay_channel2'] == 'tongdaoER') {
 					//$s = json_decode(base64_decode($data['data']));
 					//header("Location:" . $s->url)
-					$this->deposit_request_post($data);
+					$this->deposit_request_post($data, $this->serverUrl2());
 				}
 			}
 			
 		}
 		
-		protected function deposit_request_post($data)
+		protected function deposit_request_post($data, $url)
 		{
 			
 			/*$header[] = 'Content-Type:application/json;charset=UTF-8';
@@ -306,13 +301,15 @@
 			header("Location:" . $s->url);
 			exit();*/
 			//dd($data);exit();
-			$str = '<form action="' . $this->serverUrl2() .'" method="post" name="formPost">';
+			$str = '<form action="' . $url .'" method="post" name="formPost">';
 			foreach ($data as $k => $v) {
 				$str .= '<input type="hidden" name="' . $k . '" value="' . $v . '">';
 			}
 			$str .= '</form>';
+			//$str .= $str . "<script>document.forms['formPost'].submit();</script>";
+			//dd($str);exit();
 			echo $str . "<script>document.forms['formPost'].submit();</script>";
-//			dd($rs);
+			//dd($str);
 //			if ($rs->code == 0) {
 //				header("Location:" . $rs->data);
 //				exit();

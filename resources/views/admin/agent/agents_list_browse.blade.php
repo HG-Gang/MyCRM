@@ -112,6 +112,13 @@
                 {field:'qk_money' ,title:'{{ trans ('systemlanguage.proxy_qk_money') }}' ,width:100 ,align:'center', formatter: function (value, rowData, rowIndex) {
                     return "<span style='color: red;'>"+ parseFloatToFixed(value) +"</span>";
                 }},
+                {field:'mt4MarginLevel' ,title:'{{ trans ('systemlanguage.proxy_mt4MarginLevel') }}' ,width:100 ,align:'center', formatter: function (value, rowData, rowIndex) {
+                     if (rowData.username) {
+	                     return mt4MarginLevelFormat(value);
+	                } else {
+	                     return "";
+                     }
+                }},
                 {field:'rights' ,title:'{{ trans ('systemlanguage.proxy_agents_commp_rights') }}', width:100, align:'center', formatter: function (value, rowData, rowIndex) {
                     if (rowData.username) {
                         return rowData.commprop + ' / ' + value;

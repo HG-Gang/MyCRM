@@ -314,7 +314,7 @@
     @endif
     <div class="deposit-matter">
         <p style="margin-bottom:0px; height: 32px; line-height: 32px;color:red; font-weight: 600;font-size:14px;">入金注意事项</p>
-        <p>1.通道一单笔入金最高10万人民币{{--，通道二单笔入金最高18万人民币--}}。</p>
+        <p>1.通道一单笔入金最高5万人民币{{--，通道二单笔入金最高18万人民币--}}。</p>
        {{-- <p>1.通道一单笔入金最高18万人民币。</p>--}}
         <p>2.请确保以上数据完整及属实，如有不全或遗漏，会影响到帐时间。</p>
         <p>3.客户是采用人民币入金美元到账，汇率按照工作日9:30分的中国银行(香港)外汇牌价现汇买卖价作为存取款汇率，本公司保留更改汇率的最终决定权。</p>
@@ -365,8 +365,8 @@
                     errorTips("存款金额单笔最低700RMB", "msg", "deposit_amount");
                 } else if (deposit_amount != "" && deposit_amount > 0 && deposit_amount > 200001 && $("#pay_channel").val() == "tongdaoYI") {
                     errorTips("通道一存款金额单笔最高20万RMB", "msg", "deposit_amount");
-                } else if (deposit_amount != "" && deposit_amount > 0 && deposit_amount > 100001 && $("#pay_channel2").val() == "tongdaoER") {
-                    errorTips("通道一存款金额单笔最高10万RMB", "msg", "deposit_amount");
+                } else if (deposit_amount != "" && deposit_amount > 0 && deposit_amount > 50001 && $("#pay_channel2").val() == "tongdaoER") {
+                    errorTips("通道一存款金额单笔最高5万RMB", "msg", "deposit_amount");
                 } else if (deposit_amount != "" && !(Number(deposit_amount) % 100 == 0)) {
                     errorTips("存款金额单笔必须是100的整倍数", "msg", "deposit_amount");
                 } /*else if ((!$("input:radio[name='gateway_bank']").is(":checked")) && $("#pay_channel").val() == "tongdaoYI") {

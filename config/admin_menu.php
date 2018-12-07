@@ -50,7 +50,8 @@
 			[
 				'label' => '风险管理', 'url' => '#', 'icon' => '&#xe61a;', 'menu_tag' => 'FengXian', 'submenu' => [
 					['label' => '盈利风险', 'url' => route_prefix() . '/fengXian/profit_list', 'menu_tag' => 'fengXian_profit'],
-					['label' => '仓位风险', 'url' => route_prefix() . '/fengXian/position_list', 'menu_tag' => 'fengXian_position']
+					['label' => '仓位风险', 'url' => route_prefix() . '/fengXian/position_list', 'menu_tag' => 'fengXian_position'],
+					['label' => 'IP风险', 'url' => route_prefix() . '/fengXian/Ipaddress_list', 'menu_tag' => 'fengXian_Ipaddress']
 				]
 			],
 		[

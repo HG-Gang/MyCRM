@@ -52,7 +52,7 @@
 							'rec_upd_date'          => date ('Y-m-d H:i:s'),
 						]);
 				
-				if(is_object($_rs) && isset($_rs->wez_userid)) {
+				if(count($_rs) > 0) {
 					return response()->json([
 							'msg'       => 'SUC',
 							'err'       => 'noerr',
@@ -77,7 +77,10 @@
 		public function oneKeySearch()
 		{
 			$_rs = Mt4Users::select('mt4_users.LOGIN as userId', 'mt4_users.NAME as userName', 'mt4_users.BALANCE as userBalance', 'mt4_users.CREDIT as userCredit')
-					->where('mt4_users.LOGIN', '>=', 637001)->where('mt4_users.BALANCE', '<', 0)->get()->toArray();
+					->leftjoin('user', function($leftjoin) {
+						$leftjoin->on('mt4_users.LOGIN', '=', 'user.user_id');
+					})->where('user.voided', '1')->where('user.group_id', '5')->where('mt4_users.BALANCE', '<', 0)->get()->toArray();
+			
 			$no = 0;
 			if (!empty($_rs)) {
 				for ($j = 0; $j < count($_rs); $j ++) {
@@ -85,7 +88,7 @@
 							->whereIn('CMD', array(0, 1, 2, 3, 4, 5))
 							->where('CONV_RATE1', '<>', 0)->count();
 					
-					$_exits[$j] = WhsExpZero::where('whs_exp_zero.wez_userid', $_rs[$j]['userId'])->where('wez_status', 1)->where('wez_idmd5', strtoupper(md5($_rs[$j]['userId'])))->count();
+					$_exits[$j] = WhsExpZero::where('whs_exp_zero.wez_userid', $_rs[$j]['userId'])->where('wez_status', 1)->where('voided', '1')->where('wez_idmd5', strtoupper(md5($_rs[$j]['userId'])))->count();
 					
 					if($_rs[$j]['vol'] == 0 && $_exits[$j] == 0) {
 						//记录爆仓清零的人

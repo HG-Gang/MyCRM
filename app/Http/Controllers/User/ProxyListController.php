@@ -51,6 +51,7 @@
 					$_rs[$i]['fy_money']            = number_format ($_ag_sumdadta[$_rs[$i]['user_id']][0]['total_fy'], '2', '.', '');
 					$_rs[$i]['rj_money']            = number_format ($_ag_sumdadta[$_rs[$i]['user_id']][0]['total_rj'], '2', '.', '');
 					$_rs[$i]['qk_money']            = number_format ($_ag_sumdadta[$_rs[$i]['user_id']][0]['total_qk'], '2', '.', '');
+					$_rs[$i]['mt4MarginLevel']      = number_format ($_rs[$i]['mt4MarginLevel'], '2', '.', '');
 				}
 				
 				$result['rows']                     = $_rs;
@@ -60,6 +61,7 @@
 					'user_name'             => '',
 					'agentsTotal'           => '',
 					'accountTotal'          => '',
+					'mt4MarginLevel'        => '',
 					'user_money'            => $_datasum['all_total_bal'],
 					'cust_eqy'              => $_datasum['all_total_eqy'],
 					'fy_money'              => $_datasum['all_total_fy'],
@@ -157,6 +159,7 @@
 					$_rs[$key]['total_index']                 = $_page_sumdata[$_rs[$key]['user_id']]['total_index'];
 					$_rs[$key]['total_volume']                = $_page_sumdata[$_rs[$key]['user_id']]['total_volume'];
 					$_rs[$key]['total_swaps']                 = $_page_sumdata[$_rs[$key]['user_id']]['total_swaps'];
+					$_rs[$key]['mt4MarginLevel']              = number_format($_rs[$key]['mt4MarginLevel'], '2', '.', '');
 				}
 				
 				$result['rows'] = $_rs;
@@ -165,6 +168,7 @@
 					'user_group'            => '总计',
 					'user_id'               => '',
 					'user_name'             => '',
+					'mt4MarginLevel'        => '',
 					'user_money'            => $_all_sumdata['search_all_total_bal'], //总余额
 					'cust_eqy'              => $_all_sumdata['search_all_total_eqy'], //总净值
 					'total_yuerj'           => $_all_sumdata['search_all_total_yuerj'], //总入金
@@ -259,54 +263,57 @@
 			$id_list        = array ();
 			
 			$query_sql = Agents::select(
-				'user_id', 'user_name', 'parent_id', 'group_id', 'user_money',
-				'rights as rights', 'comm_prop as commprop',
-				'cust_eqy', 'user_status', 'IDcard_status', 'bank_status', 'rec_crt_date'
-			)->whereIn('agents.voided', array ('1', '2'))
-			->whereIn('agents.user_status', array('0', '1', '2', '4'))
-			->where(function ($subWhere) use ($loginId, $userId, $username, $userPId, $userstatus, $startdate, $enddate, $searchtype) {
-				if ($searchtype == 'autoSearch' || $searchtype == 'clickSearch') {
-					if (!empty($startdate) && !empty($enddate) && $this->_exte_is_Date ($startdate) && $this->_exte_is_Date ($enddate)) {
-						$subWhere->whereBetween('agents.rec_crt_date', [$startdate .' 00:00:00', $enddate . ' 23:59:59']);
-					} else {
-						if(!empty($startdate) && $this->_exte_is_Date ($startdate)) {
-							$subWhere->where('agents.rec_crt_date',  '>= ', $startdate .' 23:59:59');
-						}
-						if(!empty($enddate) && $this->_exte_is_Date ($enddate)) {
-							$subWhere->where('agents.rec_crt_date', '<', $enddate .' 00:00:00');
-						}
-					}
-					
-					if ($searchtype == 'autoSearch') {
-						$subWhere->where('agents.parent_id', $loginId['user_id']);
-					} else if ($searchtype == 'clickSearch') {
-						if (!empty($userId)) {
-							$subWhere->where('agents.user_id', 'like', '%' . $userId . '%');
+					'agents.user_id', 'agents.user_name', 'agents.parent_id', 'agents.group_id', 'user_money',
+					'agents.rights as rights', 'agents.comm_prop as commprop',
+					'agents.cust_eqy', 'agents.user_status', 'agents.IDcard_status', 'agents.bank_status', 'agents.rec_crt_date',
+					'mt4_users.LOGIN as mt4Login','mt4_users.MARGIN_LEVEL as mt4MarginLevel'
+				)->leftjoin('mt4_users', function($subleftjoin) {
+					$subleftjoin->on('mt4_users.LOGIN', ' = ', 'agents.user_id');
+				})->whereIn('agents.voided', array ('1', '2'))
+				->whereIn('agents.user_status', array('0', '1', '2', '4'))
+				->where(function ($subWhere) use ($loginId, $userId, $username, $userPId, $userstatus, $startdate, $enddate, $searchtype) {
+					if ($searchtype == 'autoSearch' || $searchtype == 'clickSearch') {
+						if (!empty($startdate) && !empty($enddate) && $this->_exte_is_Date ($startdate) && $this->_exte_is_Date ($enddate)) {
+							$subWhere->whereBetween('agents.rec_crt_date', [$startdate .' 00:00:00', $enddate . ' 23:59:59']);
 						} else {
+							if(!empty($startdate) && $this->_exte_is_Date ($startdate)) {
+								$subWhere->where('agents.rec_crt_date',  '>= ', $startdate .' 23:59:59');
+							}
+							if(!empty($enddate) && $this->_exte_is_Date ($enddate)) {
+								$subWhere->where('agents.rec_crt_date', '<', $enddate .' 00:00:00');
+							}
+						}
+
+						if ($searchtype == 'autoSearch') {
 							$subWhere->where('agents.parent_id', $loginId['user_id']);
-							/*$subWhere->whereIn('agents.user_id', function ($whereIn) use ($loginId) {
-								$whereIn->selectRaw("
-									agents.user_id from agents where agents.parent_id in (
-										select agents.user_id  from agents where agents.parent_id in (
-											select agents.user_id  from agents where agents.parent_id = " . intval ($loginId['user_id']) . " and agents.voided = '1' and agents.user_status in ('0','1','2','4') or agents.user_id = " . intval ($loginId['user_id']) . "
+						} else if ($searchtype == 'clickSearch') {
+							if (!empty($userId)) {
+								$subWhere->where('agents.user_id', 'like', '%' . $userId . '%');
+							} else {
+								$subWhere->where('agents.parent_id', $loginId['user_id']);
+								/*$subWhere->whereIn('agents.user_id', function ($whereIn) use ($loginId) {
+									$whereIn->selectRaw("
+										agents.user_id from agents where agents.parent_id in (
+											select agents.user_id  from agents where agents.parent_id in (
+												select agents.user_id  from agents where agents.parent_id = " . intval ($loginId['user_id']) . " and agents.voided = '1' and agents.user_status in ('0','1','2','4') or agents.user_id = " . intval ($loginId['user_id']) . "
+											) and agents.voided = '1' and agents.user_status in ('0','1','2','4') or agents.user_id = " . intval ($loginId['user_id']) . "
 										) and agents.voided = '1' and agents.user_status in ('0','1','2','4') or agents.user_id = " . intval ($loginId['user_id']) . "
-									) and agents.voided = '1' and agents.user_status in ('0','1','2','4') or agents.user_id = " . intval ($loginId['user_id']) . "
-								");
-							});*/
+									");
+								});*/
+							}
+						}
+						if (!empty($username)) {
+							$subWhere->where('agents.user_name', 'like', '%' . $username . '%');
+						}
+						if ($userstatus != '') {
+							$subWhere->where('agents.user_status', $userstatus);
 						}
 					}
-					if (!empty($username)) {
-						$subWhere->where('agents.user_name', 'like', '%' . $username . '%');
+
+					if (!empty($userPId) && $searchtype == 'subSearch') {
+						$subWhere->where('agents.parent_id', $userPId);
 					}
-					if ($userstatus != '') {
-						$subWhere->where('agents.user_status', $userstatus);
-					}
-				}
-				
-				if (!empty($userPId) && $searchtype == 'subSearch') {
-					$subWhere->where('agents.parent_id', $userPId);
-				}
-			});
+				});
 			
 			if ($search == 'page') {
 				$id_list = $query_sql->skip($this->_offset)->take($this->_pageSize)->orderBy('rec_crt_date', 'desc')->get()->toArray();
@@ -478,8 +485,11 @@
 			
 			$query_sql = User::select(
 				'user.user_id', 'user.user_name', 'user.parent_id', 'user.group_id', 'user.user_money', 'user.cust_eqy', 'user.user_status',
-				'user.IDcard_status', 'user.bank_status', 'user.mt4_grp as user_group', 'user.rec_crt_date'
-			)->where('user.parent_id', $puid)->whereIn('user.voided', array ('1', '2'))->whereIn('user.user_status', array('0', '1', '2', '4'));
+				'user.IDcard_status', 'user.bank_status', 'user.mt4_grp as user_group', 'user.rec_crt_date',
+				'mt4_users.LOGIN as mt4Login','mt4_users.MARGIN_LEVEL as mt4MarginLevel'
+			)->leftjoin('mt4_users', function($subleftjoin) {
+				$subleftjoin->on('mt4_users.LOGIN', ' = ', 'user.user_id');
+			})->where('user.parent_id', $puid)->whereIn('user.voided', array ('1', '2'))->whereIn('user.user_status', array('0', '1', '2', '4'));
 			
 			if ($search == 'page') {
 				$id_list = $query_sql->skip($this->_offset)->take($this->_pageSize)->orderBy('rec_crt_date', 'desc')->get()->toArray();

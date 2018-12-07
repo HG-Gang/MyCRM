@@ -1232,11 +1232,22 @@ function fengXianValFormat(value) {
 	return str ;
 }
 
+function mt4MarginLevelFormat(value) {
+	var str = "";
+	if (Number(value) > 0) {
+		str = "<span style='color: #FF00FF;'>"+ value + "%" +"</span>";
+	} else {
+		str = "<span style='color: #000000;'>"+ value + "%" +"</span>";
+	}
+
+	return str ;
+}
+
 function wezstatus(value)
 {
 	if (value == "1") {
 		return "<span style='color:#6633CC;'>待清零</span>";
-	} else if (value == 2) {
+	} else if (value == "2") {
 		return "<span style='color:#15ccb6;'>已清零</span>";
 	} else {
 		return "<span style='color:red;'>未知状态</span>";

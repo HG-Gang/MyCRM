@@ -110,6 +110,13 @@
 					
 					return parseFloatToFixed(value);
 				}},
+				{field:'mt4MarginLevel' ,title:'{{ trans ('systemlanguage.proxy_mt4MarginLevel') }}', width:100, align:'center', formatter: function (value, rowData, rowIndex) {
+					if(rowData.user_name) {
+						return mt4MarginLevelFormat(value);
+					} else {
+						return "";
+					}
+				}},
 				{field:'total_noble_metal' ,title:'{{ trans ('systemlanguage.direct_customer_user_noble_metal') }}', width:100, align:'center'},
 				{field:'total_for_exca' ,title:'{{ trans ('systemlanguage.direct_customer_user_foreign_exchange') }}', width:100, align:'center'},
 				{field:'total_crud_oil' ,title:'{{ trans ('systemlanguage.direct_customer_user_energy') }}', width:100, align:'center'},

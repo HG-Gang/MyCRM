@@ -694,6 +694,7 @@ class AgentController extends Abstract_Mt4service_Controller {
 				$_rs[$i]['fy_money']            = number_format ($_ag_sumdadta[$_rs[$i]['user_id']][0]['total_fy'], '2', '.', '');
 				$_rs[$i]['rj_money']            = number_format ($_ag_sumdadta[$_rs[$i]['user_id']][0]['total_rj'], '2', '.', '');
 				$_rs[$i]['qk_money']            = number_format ($_ag_sumdadta[$_rs[$i]['user_id']][0]['total_qk'], '2', '.', '');
+				$_rs[$i]['mt4MarginLevel']      = number_format ($_rs[$i]['mt4MarginLevel'], '2', '.', '');
 			}
 			
 			$result['rows']                     = $_rs;
@@ -707,6 +708,7 @@ class AgentController extends Abstract_Mt4service_Controller {
 				'parentId'                      => '',
 				'agentsTotal'                   => '',
 				'accountTotal'                  => '',
+				'mt4MarginLevel'                => '',
 				'usermoney'                     => $_datasum['all_total_bal'],
 				'custeqy'                       => $_datasum['all_total_eqy'],
 				'fy_money'                      => $_datasum['all_total_fy'],
@@ -983,8 +985,11 @@ class AgentController extends Abstract_Mt4service_Controller {
 			'agents.user_money as usermoney', 'agents.cust_eqy as custeqy', 'agents.user_status as userstatus', 'agents.IDcard_status as idcardstatus',
 			'agents.bank_status as bankstatus', 'agents.mt4_grp as mt4grp', 'agents.trans_mode as transmode', 'agents.rights as rights', 'agents.comm_prop as commprop',
 			'agents.is_confirm_agents_lvg as isconfirmagtlvg', 'agents.settlement_model as settlementmodel', 'agents.rec_crt_date',
-			'user_group.user_group_id as usergrp_id', 'user_group.user_group_name as usergrp_name'
-		)->leftjoin('user_group', function ($leftjoin) {
+			'user_group.user_group_id as usergrp_id', 'user_group.user_group_name as usergrp_name',
+			'mt4_users.LOGIN as mt4Login','mt4_users.MARGIN_LEVEL as mt4MarginLevel'
+		)->leftjoin('mt4_users', function($subleftjoin) {
+			$subleftjoin->on('mt4_users.LOGIN', ' = ', 'agents.user_id');
+		})->leftjoin('user_group', function ($leftjoin) {
 			$leftjoin->on('agents.mt4_grp', ' = ', 'user_group.user_group_name')->where('user_group.voided', ' = ', '1');
 		})->where('agents.voided', '1')->whereIn('agents.user_status', array('0', '1', '2', '4'))
 			->where(function ($subWhere) use ($data) {

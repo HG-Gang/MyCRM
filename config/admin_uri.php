@@ -182,6 +182,14 @@
 										'FengXianManageController@fengXian_position_list' => '查找',
 								]
 						],
+						[
+								'menu_name' => 'IP风险',
+								'menu_tag' => 'fengXian_Ipaddress',
+								'uri' => [
+										'FengXianManageController@fengXian_Ipaddress_browse' => '视图',
+										'FengXianManageController@fengXian_Ipaddress_list' => '查找',
+								]
+						],
 				]
 		],
 		

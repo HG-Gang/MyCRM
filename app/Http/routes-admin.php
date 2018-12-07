@@ -89,6 +89,7 @@
 			###爆仓列表
 			Route::get('order/whs_exp_zero_list', 'Admin\AdminWhsExpZeroController@whs_exp_zero_list');
 			//Route::post('order/whsCustListSearch', 'Admin\AdminWhsExpZeroController@whsCustListSearch');
+			Route::post('order/oneKeyZero', 'Admin\AdminWhsExpZeroController@oneKeyZero');
 			Route::post('order/oneKeySearch', 'Admin\AdminWhsExpZeroController@oneKeySearch');
 			Route::post('order/whsExpZeroListSearch', 'Admin\AdminWhsExpZeroController@whsExpZeroListSearch');
 			#################end##################################
@@ -140,8 +141,11 @@
 			###风险管理
 			Route::get('fengXian/profit_list', 'Admin\FengXianManageController@fengXian_profit_browse');
 			Route::get('fengXian/position_list', 'Admin\FengXianManageController@fengXian_position_browse');
+			Route::get('fengXian/Ipaddress_list', 'Admin\FengXianManageController@fengXian_Ipaddress_browse');
+			Route::get('fengXian/IpaddressDeatail/{idaddr}', 'Admin\FengXianManageController@fengXian_Ipaddress_detail');
 			Route::post('fengXian/profitSearch', 'Admin\FengXianManageController@fengXian_profit_list');
 			Route::post('fengXian/positionSearch', 'Admin\FengXianManageController@fengXian_position_list');
+			Route::post('fengXian/IpaddressSearch', 'Admin\FengXianManageController@fengXian_Ipaddress_list');
 			
 			###外汇牌价
 			Route::get('amount/whpj_rate', 'Admin\ExchangeRateController@whpj_rate_browse');
