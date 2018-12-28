@@ -5,11 +5,6 @@
 	 * Date: 2018-04-23
 	 * Time: 下午 5:49
 	 */
-	/*
-	*http://168.63.151.74:8002
-	 * 账户：250212515@qq.com
-	 * 密码：15622807309
-	* */
 	
 	namespace App\Http\Controllers\PayController;
 	
