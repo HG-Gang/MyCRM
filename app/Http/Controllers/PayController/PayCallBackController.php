@@ -51,6 +51,7 @@
 			$_retrun_data['orderStatus']	= $request->status; //订单状态
 			$_retrun_data['sign']		    = $request->sign;
 			$_retrun_data['channel']		= $request->paytype; //支付类型
+			$_retrun_data['payType']		= '';
 			$_retrun_data['data']           = $request->all();
 			
 			$this->pay_debugfile($_retrun_data, '支付异步回调', 'PayPostRetrun');
@@ -90,6 +91,7 @@
 			$_retrun_data['trade_time']		= $request->trade_time;
 			$_retrun_data['reserve1']		= $request->reserve1;
 			$_retrun_data['msg']		    = $request->msg;
+			$_retrun_data['payType']		= '';
 			//$_retrun_data['sign']		    = $request->sign;
 			//$_retrun_data['channel']		= $request->channel;
 			$_retrun_data['data']           = $request->all();
@@ -138,6 +140,25 @@
 			} else {
 				echo '无效的地址!';
 			}
+		}
+		
+		//OTC 回调
+		public function deposit_notify_response_success_otc (Request $request)
+		{
+			//{"coinAmount":"100.004","legalAmount":"100.3","orderId":"BROTC-20181219182857-318001","playerId":100003,"status":1}
+			//{"coinAmount":"99_7","legalAmount":"100","orderId":"BROTC-20181220123337-318001","playerId":100003,"status":2}
+			$_rs['data']					= $request->all();
+			$_retrun_data['outOrderId']		= $_rs['data']['orderId'];
+			$_retrun_data['outOrderId_OTC']	= $_rs['data']['otc_order']; //OTC订单号
+			$_retrun_data['serialNo']		= $_rs['data']['playerId']; //用户OTC入金Id
+			$_retrun_data['amount']			= $_rs['data']['legalAmount'];//玩家支付金额
+			$_retrun_data['act_amount']		= $_rs['data']['coinAmount'];//实际到帐金额
+			$_retrun_data['orderStatus']	= ($_rs['data']['status'] == 2) ? 200 : $_rs['data']['status']; //1=未支付，2支付成功
+			$_retrun_data['payType']		= 'BROTC';
+			$_retrun_data['data']			= $request->all();
+			
+			$this->debugfile($_retrun_data, '支付异步回调OTC', 'PayPostRetrunOTC');
+			$_rs = $this->_exte_pay_success_sync_mt4_deposit_otc($_retrun_data, $request);
 		}
 		
 		protected function check_orderno_in_mt4_status ($resp_data)
@@ -206,7 +227,7 @@
 							if ($_retrun_data['orderStatus'] == 200) {
 								//一切正常 调用完成逻辑  订单号 金额， 开始同步MT4
 								$sync_mt4 = $this->_exte_mt4_deposit_amount($uid, $trades_info['dep_act_amount'], $cmt);
-								echo ($_retrun_data['orderId'] == "10952") ? 'success' : 'SUCCESS';
+								
 								if(is_array($sync_mt4) && $sync_mt4['ret'] == '0') {
 									$phone              = substr($_rs['phone'], (stripos($_rs['phone'], '-') + 1));
 									$data['amt']        = $trades_info['dep_act_amount'];
@@ -222,6 +243,12 @@
 									]);
 								}
 								return Redirect()->route('userIndex');
+							}
+							
+							if($_retrun_data['payType'] == 'BROTC') {
+								return 'SUCCESS';
+							} else {
+								echo ($_retrun_data['orderId'] == "10952") ? 'success' : 'SUCCESS';
 							}
 						} else {
 							echo '无效的订单或已经处理此订单!';
@@ -263,6 +290,113 @@
 					'dep_outChannelNo'              => $param['serialNo'], // 上游渠道订单号， 唯一
 					'dep_transTime'                 => date('Y-m-d H:i:s'),
 					'rec_upd_date'                  => date('Y-m-d H:i:s'),
+				]);
+				$is_exists_trades = true;
+			} else {
+				$is_exists_trades = false;
+			}
+			
+			return $is_exists_trades;
+		}
+		
+		//OTC 回调处理
+		protected function _exte_pay_success_sync_mt4_deposit_otc($_retrun_data)
+		{
+			$outNo = $this->check_pay_order_trades_status_otc($_retrun_data);
+			
+			if($outNo) {
+				//支付成功，开始写入MT4
+				$_local     = strripos($_retrun_data['outOrderId'], '-');
+				$uid        = substr($_retrun_data['outOrderId'], $_local + 1);
+				$_table     = $this->_exte_get_table_obj ($uid);
+				
+				$_rs = $_table::select('user_id', 'user_name', 'phone', 'email')->where('user_id', $uid)->where('voided' ,'1')->whereIn('user_status', array('0', '1', '2', '4'))->first();
+				if($_rs == null) {
+					echo '非法请求';
+				} else {
+					$trades_info = DepositRecordLog::select('dep_id', 'dep_amount', 'dep_act_amount', 'dep_amt_rate', 'voided') //支付金额，充值金额
+					->where('rec_crt_user', $uid)
+							->where('dep_outTrande', $_retrun_data['outOrderId']) //订单号
+							->where('dep_outChannelNo', $_retrun_data['outOrderId_OTC']) //商户号
+							//->where('dep_amount', $_retrun_data['amount']) //支付金额
+							->first();
+					
+					$cmt = $uid . '-' . $trades_info['dep_id'] . self::CZ;
+					//查找MT4_TRADES订单表，查看是否已经存在该记录
+					$act_amt_USD            = number_format(($_retrun_data['amount'] / $trades_info['dep_amt_rate']), '2', '.', '');
+					$chk_mt4 = Mt4Trades::where('LOGIN', $uid)->where('PROFIT', $act_amt_USD)->where('COMMENT', $cmt)->where('CMD', 6)->first();
+					
+					if ($chk_mt4 == null) {
+						if($trades_info != null && $trades_info['voided'] == '01') {
+							$num = DepositRecordLog::where('dep_outTrande', $_retrun_data['outOrderId'])->where('rec_crt_user', $uid)->update([
+									'dep_amount'					=> $_retrun_data['amount'],
+									'dep_act_amount'				=> $act_amt_USD,
+							]);
+							
+							if ($_retrun_data['orderStatus'] == 200) {
+								//一切正常 调用完成逻辑  订单号 金额， 开始同步MT4
+								$sync_mt4 = $this->_exte_mt4_deposit_amount($uid, $act_amt_USD, $cmt);
+								if(is_array($sync_mt4) && $sync_mt4['ret'] == '0') {
+									$phone              = substr($_rs['phone'], (stripos($_rs['phone'], '-') + 1));
+									$data['amt']        = $act_amt_USD;
+									$data['user_id']    = $_rs['user_id'];
+									$data['user_name']  = $_rs['user_name'];
+									$_sendinfo          = $this->_exte_send_phone_notify($phone, 'deposit', $data);
+									
+									$num = DepositRecordLog::where('dep_outTrande', $_retrun_data['outOrderId'])->where('rec_crt_user', $uid)->update([
+											'voided'                        => '02', //MT4开始入金此账户
+											'dep_outChannelNo'              => $_retrun_data['outOrderId_OTC'], // 上游渠道订单号， 唯一
+											'dep_mt4_id'					=> $sync_mt4['order'], //TODO MT4入金成功后，将此单号记录在此表
+											'rec_upd_date'                  => date('Y-m-d H:i:s'),
+									]);
+								}
+								
+								if($_retrun_data['payType'] == 'BROTC') {
+									return 'SUCCESS';
+								} else {
+									echo ($_retrun_data['orderId'] == "10952") ? 'success' : 'SUCCESS';
+								}
+							}
+						} else {
+							echo '无效的订单或已经处理此订单!';
+						}
+					} else {
+						$phone              = substr($_rs['phone'], (stripos($_rs['phone'], '-') + 1));
+						$data['amt']        = $trades_info['dep_act_amount'];
+						$data['user_id']    = $_rs['user_id'];
+						$data['user_name']  = $_rs['user_name'];
+						$_sendinfo          = $this->_exte_send_phone_notify($phone, 'deposit', $data);
+						$num = DepositRecordLog::where('dep_outTrande', $_retrun_data['outOrderId'])->where('rec_crt_user', $uid)->update([
+								'voided'                        => '02', //MT4开始入金此账户
+								'dep_outChannelNo'              => $_retrun_data['outOrderId_OTC'], // 上游渠道订单号， 唯一
+								'dep_mt4_id'					=> $chk_mt4['TICKET'], // TODO MT4入金成功后，将此单号记录在此表
+								'rec_upd_date'                  => date('Y-m-d H:i:s'),
+						]);
+					}
+				}
+			} else {
+				return Redirect()->route('userIndex');
+			}
+		}
+		
+		protected function check_pay_order_trades_status_otc($param) 
+		{
+			//支付成功回调检查订单
+			if($param['orderStatus'] == 200) {
+				$pay_status = '02'; //支付状态 01 失败，02成功
+			} else {
+				$pay_status = '01'; //支付状态 01 失败，02成功
+			}
+			
+			$_rs = DepositRecordLog::where('dep_outTrande', $param['outOrderId'])->first();
+			
+			if ($_rs != null && $_rs['voided'] == '01') {
+				/*异步回调更新本地初始记录当前订单信息 voided = 01 未处理过，02 一级处理过次订单*/
+				$num = DepositRecordLog::where('dep_outTrande', $param['outOrderId'])->update([
+						'dep_status'                    => $pay_status, //订单状态 01 失败，02支付成功
+						'dep_outChannelNo'              => $param['outOrderId_OTC'], // 上游渠道订单号， 唯一
+						'dep_transTime'                 => date('Y-m-d H:i:s'),
+						'rec_upd_date'                  => date('Y-m-d H:i:s'),
 				]);
 				$is_exists_trades = true;
 			} else {

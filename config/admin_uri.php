@@ -93,6 +93,7 @@
 						'WithdrawAmountController@withdrawApplySearch' => '查找',
 						'WithdrawAmountController@withdrawOrderIdDetail' => '订单详情',
 						'WithdrawAmountController@withdrawOrderStaus' => '订单操作',
+						'WithdrawAmountController@generateOTCorder' => '生成订单',
 					]
 				],
 				[
@@ -114,6 +115,16 @@
 						'WithdrawFlowController@withdrawExport' => '导出Excel',
 						'WithdrawFlowController@DownloadFile' => '下载Excel',
 					]
+				],
+				[
+						'menu_name' => '未付流水',
+						'menu_tag' => 'undeposit_flow',
+						'uri' => [
+								'WithdrawFlowController@undeposit_flow' => '出金流水列表',
+								'WithdrawFlowController@undepositFlowSearch' => '查找',
+								//'WithdrawFlowController@withdrawExport' => '导出Excel',
+								//'WithdrawFlowController@DownloadFile' => '下载Excel',
+						]
 				],
 				[
 					'menu_name' => '权益统计',

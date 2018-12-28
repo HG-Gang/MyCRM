@@ -47,6 +47,10 @@
 		
 		protected $_gateway                     = ''; //支付方式，默认网银
 		
+		protected $_deposit_url_otc         	= '';
+		
+		protected $_notifyUrl_otc         		= '';
+		
 		protected $_gateway_code                = [
 				'ECITIC'                            => 'CTIB', //中信银行
 				'CMBC'                              => 'CMSB', //民生银行 OK
@@ -104,6 +108,10 @@
 			return $this->_prefix2 = 'PDFX2-';
 		}
 		
+		public function orderNoPrefix_otc () {
+			return 'PADAOTC-';
+		}
+		
 		public function orderNo() {
 			return $this->_order_no = date('YmdHis');
 		}
@@ -124,12 +132,16 @@
 			return $this->_notifyUrl2 = route('user_deposit_notfiy2');
 		}
 		
+		public function notifyUrl_otc() {
+			return $this->_notifyUrl_otc = route('user_deposit_notfiy_otc');
+		}
+		
 		public function merId () {
-			return $this->_merId = '';
+			return $this->_merId = '10952';
 		}
 		
 		public function merId2 () {
-			return $this->_merId2 = '';
+			return $this->_merId2 = '1806';
 		}
 		
 		public function key () {
@@ -146,6 +158,10 @@
 		
 		public function serverUrl2 () {
 			return $this->_serverUrl2 = 'http://gw_yyf.ppp3.xyz/webpay';
+		}
+		
+		public function deposit_url_otc() {
+			return $this->_deposit_url_otc = 'http://103.68.180.177:33333/deposit';
 		}
 		
 		public function bankCode($bankCode) {
@@ -370,5 +386,57 @@
 			}
 			$buff = trim($buff, "&");
 			return $buff;
+		}
+		
+		/*
+		 * OTC 充值入口
+		 * */
+		public function form_init_otc($param)
+		{
+			$orderId = $this->orderNoPrefix_otc() . $this->orderNo(). '-' . $param['userId'];//商户平台的订单号，确保唯一性
+			$data = collect([
+					'playerId'			=> $param['playerId'],
+					'orderId'			=> $orderId,
+					'callback'			=> $this->notifyUrl_otc(),//支付结果异步通知地址
+			]);
+			
+			//本地初始记录当前订单信息
+			$num = DepositRecordLog::create([
+					'dep_mchId'                     => 'OTCOTC', //商户号
+					'dep_channel'                   => 'OTCPAY', //支付类型
+					'dep_body'                      => $param['userId'] . '-CZ',  //备注
+					'dep_outTrande'                 => $orderId, //订单号，唯一
+					'dep_amount'                    => $param['deposit_amt'], //实际支付
+					'dep_act_amount'                => $param['deposit_act_amt'], //实际存款
+					'dep_amt_rate'					=> $param['deposit_rate'], //当前存款汇率
+					'dep_status'                    => '01', //默认支付失败
+					'voided'                        => '01', //默认MT4没有处理次订单
+					'rec_crt_user'                  => $param['userId'],
+					'rec_upd_user'                  => $param['userId'],
+					'rec_crt_date'                  => date('Y-m-d H:i:s'),
+					'rec_upd_date'                  => date('Y-m-d H:i:s'),
+			]);
+			
+			if (!$num) {
+				echo "系统繁忙,请稍后再操作.";
+			} else {
+				//4.发送支付请求
+				$ret = $this->otc_pay_request($data->toJson());
+				
+				if($ret['flag'] == 'fail') {
+					echo '呀！不小心出错了, 请重试或者联系客服.';
+				} else if($ret['flag'] == 'success') {
+					header("Location:".$ret['url']);
+					exit;
+				}
+			}
+		}
+		
+		protected function otc_pay_request($data)
+		{
+			$client = new \GuzzleHttp\Client();
+			$request = $client->post($this->deposit_url_otc(), ['body' => $data]);
+			$response = $request->getBody();
+			return json_decode($response, true);
 		}
 	}

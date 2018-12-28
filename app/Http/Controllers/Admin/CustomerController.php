@@ -614,25 +614,25 @@
 				foreach ($id_list as $key => $vdata) {
 					$_one_sumdata[$vdata['user_id']] = Mt4Trades::selectRaw ("
 						/*手续费*/
-						abs( sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.commission else 0 end ) ) as total_comm,
+						abs( sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.COMMISSION else 0 end ) ) as total_comm,
 						/*客户余额入金*/
-						sum( case when mt4_trades.profit > 0 and mt4_trades.CMD in (6) and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.profit else 0 end ) as total_yuerj,
+						sum( case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.PROFIT else 0 end ) as total_yuerj,
 						/*客户余额出金*/
-						sum( case when mt4_trades.profit < 0 and mt4_trades.CMD in (6) and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.profit else 0 end ) as total_yuecj,
+						sum( case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.PROFIT else 0 end ) as total_yuecj,
 						/*手数*/
-						sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.volume else 0 end ) as total_volume,
+						sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.VOLUME else 0 end ) as total_volume,
 						/*利息*/
-						abs( sum( case when mt4_trades.swaps < 0 and mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.swaps else 0 end ) ) as total_swaps,
+						abs( sum( case when mt4_trades.SWAPS < 0 and mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.SWAPS else 0 end ) ) as total_swaps,
 						/*盈亏*/
-						sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.profit else 0 end ) as total_profit,
+						sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.PROFIT else 0 end ) as total_profit,
 						/*贵金属*/
-					     sum( case when mt4_trades.symbol in ( select sym_symbol from symbol_prices where sym_grp_id = 1 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.volume else 0 end ) as total_noble_metal,
-					    /*外汇*/
-					     sum( case when mt4_trades.symbol in ( select sym_symbol from symbol_prices where sym_grp_id = 2 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.volume else 0 end ) as total_for_exca,
-					    /*原油*/
-					     sum( case when mt4_trades.symbol in ( select sym_symbol from symbol_prices where sym_grp_id = 3 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.volume else 0 end ) as total_crud_oil,
-					    /*指数*/
-					     sum( case when mt4_trades.symbol in ( select sym_symbol from symbol_prices where sym_grp_id = 4 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.volume else 0 end ) as total_index
+						sum( case when mt4_trades.SYMBOL in ( select sym_symbol from symbol_prices where sym_grp_id = 1 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.VOLUME else 0 end ) as total_noble_metal,
+						/*外汇*/
+						sum( case when mt4_trades.SYMBOL in ( select sym_symbol from symbol_prices where sym_grp_id = 2 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.VOLUME else 0 end ) as total_for_exca,
+						/*原油*/
+						sum( case when mt4_trades.SYMBOL in ( select sym_symbol from symbol_prices where sym_grp_id = 3 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.VOLUME else 0 end ) as total_crud_oil,
+						/*指数*/
+						sum( case when mt4_trades.SYMBOL in ( select sym_symbol from symbol_prices where sym_grp_id = 4 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.VOLUME else 0 end ) as total_index
 					")->where('LOGIN', $vdata['user_id'])->get()->toArray();
 				}
 				
@@ -671,25 +671,25 @@
 			
 			$_allsumdata['search_total'] = Mt4Trades::selectRaw ("
 					/*总手续费*/
-					abs( sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.commission else 0 end ) ) as total_comm,
+					abs( sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.COMMISSION else 0 end ) ) as total_comm,
 					/*客户总余额入金*/
-					sum( case when mt4_trades.profit > 0 and mt4_trades.CMD in (6) and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.profit else 0 end ) as total_yuerj,
+					sum( case when mt4_trades.PROFIT > 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.PROFIT else 0 end ) as total_yuerj,
 					/*客户总余额出金*/
-					sum( case when mt4_trades.profit < 0 and mt4_trades.CMD in (6) and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.profit else 0 end ) as total_yuecj,
+					sum( case when mt4_trades.PROFIT < 0 and mt4_trades.CMD = 6 and mt4_trades.COMMENT NOT LIKE '%Adj%' then mt4_trades.PROFIT else 0 end ) as total_yuecj,
 					/*总手数 == 总交易量*/
-					sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.volume else 0 end ) as total_volume,
+					sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.VOLUME else 0 end ) as total_volume,
 					/*总利息*/
-					abs( sum( case when mt4_trades.swaps < 0 and mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.swaps else 0 end ) ) as total_swaps,
+					abs( sum( case when mt4_trades.SWAPS < 0 and mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.SWAPS else 0 end ) ) as total_swaps,
 					/*总盈亏*/
-					sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.profit else 0 end ) as total_profit,
+					sum( case when mt4_trades.CMD in (0, 1, 2, 3, 4, 5 ) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.PROFIT else 0 end ) as total_profit,
 					/*总贵金属*/
-					 sum( case when mt4_trades.symbol in ( select sym_symbol from symbol_prices where sym_grp_id = 1 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.volume else 0 end ) as total_noble_metal,
+					sum( case when mt4_trades.SYMBOL in ( select sym_symbol from symbol_prices where sym_grp_id = 1 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.VOLUME else 0 end ) as total_noble_metal,
 					/*总外汇*/
-					 sum( case when mt4_trades.symbol in ( select sym_symbol from symbol_prices where sym_grp_id = 2 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.volume else 0 end ) as total_for_exca,
+					sum( case when mt4_trades.SYMBOL in ( select sym_symbol from symbol_prices where sym_grp_id = 2 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.VOLUME else 0 end ) as total_for_exca,
 					/*总原油*/
-					 sum( case when mt4_trades.symbol in ( select sym_symbol from symbol_prices where sym_grp_id = 3 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.volume else 0 end ) as total_crud_oil,
+					sum( case when mt4_trades.SYMBOL in ( select sym_symbol from symbol_prices where sym_grp_id = 3 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.VOLUME else 0 end ) as total_crud_oil,
 					/*总指数*/
-					 sum( case when mt4_trades.symbol in ( select sym_symbol from symbol_prices where sym_grp_id = 4 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.close_time > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.volume else 0 end ) as total_index
+					sum( case when mt4_trades.SYMBOL in ( select sym_symbol from symbol_prices where sym_grp_id = 4 and voided = 1 ) and mt4_trades.CMD in (0, 1, 2, 3, 4, 5) and mt4_trades.CLOSE_TIME > '1970-01-01 00:00:00' and mt4_trades.CONV_RATE1 <> 0 then mt4_trades.VOLUME else 0 end ) as total_index
 				")->whereIn('mt4_trades.LOGIN', function ($whereIn) use ($data) {
 				$whereIn->select('user.user_id')->from('user')
 					->join('mt4_users', 'mt4_users.LOGIN', ' = ', 'user.user_id')

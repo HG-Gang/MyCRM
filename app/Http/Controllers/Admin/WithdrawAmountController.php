@@ -17,14 +17,111 @@
 	{
 		public function withdraw_apply()
 		{
-			return view('admin.withdraw_apply.withdraw_apply_browse');
+			return view('admin.withdraw_apply.withdraw_apply_browse_OTC')->with (['permit' => $this->Role()]);
 		}
 		
 		public function withdrawOrderIdDetail($orderId)
 		{
 			$_order_info = DrawRecordLog::where('draw_record_log.record_id', $orderId)->where('draw_record_log.voided', '1')->get()->toArray();
 			
-			return view('admin.withdraw_apply.withdraw_apply_detail')->with(['_order_info' => $_order_info[0]]);
+			return view('admin.withdraw_apply.withdraw_apply_detail_OTC')->with(['_order_info' => $_order_info[0]]);
+		}
+		
+		public function generateOTCorder(Request $request)
+		{
+			$orderId		= $request->orderId;
+			$userId			= $request->userId;
+			$_user_info		= $this->_exte_get_user_info($userId);
+			$_table         = $this->_exte_get_table_obj($userId);
+			if($_user_info['player_Id'] == "") {
+				//同步注册 OTC 入金 ID
+				$_ret = $this->_exte_register_playerId($userId);
+				$_rs = $_table::where('user_id', $userId)
+						->whereIn('voided', array ('1', '2'))
+						->whereIn('user_status', array ('0', '1', '2', '4'))
+						->update([
+								'player_Id' => $_ret['playerId'],
+						]);
+			}
+			
+			/*
+			 * 1. 点击生成订单检查是否有回调
+					判断依据：有没有OTC订单号
+						a.没有先生成本地订单号,再请求
+						b.有提示请进入操作审核流程
+			 * */
+			$_rs			= DrawRecordLog::where('voided', '1')->where('apply_status', '0')->find($orderId);
+			if($_rs->orderId_OTC !="") {
+				return response()->json([
+						'msg'               => 'exists order',
+						'err'               => 'errexists',
+						'col'               => 'nocol',
+				]);
+			} else {
+				$_user_info		= $this->_exte_get_user_info($userId);
+				$_num = DrawRecordLog::where('record_id', $orderId)
+						->where('voided', '1')->where('apply_status', '0')
+						->update([
+								'orderId_LOC'		=> 'PADAOTC-' . date('YmdHis') . '-WR-' . $userId,
+						]);
+				$_rs			= DrawRecordLog::where('voided', '1')->where('apply_status', '0')->find($orderId);
+				//开始调用 OTC 提款流程
+				$otc = collect([
+						'playerId'		=> $_user_info['player_Id'],
+						'orderId'		=> $_rs->orderId_LOC,
+						'amount'		=> $_rs->act_apply_amount, //实际申请金额,没扣除手续费前的出金金额
+						'bankAccount'	=> $_rs->draw_bank_no,
+						'bankName'		=> $_rs->draw_bank_class,
+						'bankBranch'	=> $_rs->draw_bank_info,
+						'accountName'	=> $_rs->user_name,
+						'callback'		=> route('user_withdraw_notfiy_otc'),
+				]);
+				
+				$_ret = $this->_exte_register_playerId_main($this->_withdraw_url, $otc->toJson());
+				
+				if($_ret['flag'] == "success") {
+					return response()->json([
+							'msg'               => $_ret['url'],
+							'err'               => 'noerr',
+							'col'               => $_rs->record_id,
+					]);
+				} else {
+					return response()->json([
+							'msg'               => 'FAIL',
+							'err'               => $_ret['reason'],
+							'col'               => $_rs->record_id,
+					]);
+				}
+			}
+		}
+		
+		public function updateCurrOrderId(Request $request)
+		{
+			$recordId		= $request->recordId;
+			
+			$_rs = DrawRecordLog::where('record_id', $recordId)
+					->where('voided', '1')->where('apply_status', '0')
+					->get()->toArray();
+			
+			$_num = DrawRecordLog::where('record_id', $recordId)
+					->where('voided', '1')->where('apply_status', '0')
+					->update([
+						'orderId_LOC'		=> 'BROTC-' . date('YmdHis') . '-WR-' . $_rs[0]['user_id'],
+					]);
+			
+			if($_num) {
+				return response()->json([
+						'msg'               => 'SUCCESS',
+						'err'               => 'NOERR',
+						'col'               => 'NOCOL',
+				]);
+			} else {
+				return response()->json([
+						'msg'               => 'FAIL',
+						'err'               => 'UPDATEFAIL',
+						'col'               => 'NOCOL',
+				]);
+			}
 		}
 		
 		public function withdrawApplySearch (Request $request)
@@ -116,6 +213,94 @@
 			}
 		}
 		
+		public function withdrawOrderStaus_OTC (Request $request)
+		{
+			$orderId            = $request->orderId;
+			$orderStatus        = $request->orderStatus;
+			$orderRemark        = $request->orderRemark;
+			
+			if (!in_array($orderStatus, array('0', '1', '2', '3'))) {
+				return response()->json([
+						'msg'               => 'FAIL',
+						'err'               => 'invalidValue',
+						'col'               => 'apply_status',
+				]);
+			}
+			
+			$_order_info = DrawRecordLog::where('draw_record_log.record_id', $orderId)->where('draw_record_log.voided', '1')->get()->toArray();
+			//TODO 出款失败，出款金额返回给原账户
+			if ($orderStatus == 3) {
+				//TODO 拒绝提款，通知 OTC，更改订单状态
+				if($_order_info['orderId_OTC'] != '') {
+					//OTC提款审核拒绝
+					$data = collect([
+							'orderId'		=> $_order_info[0]['orderId_LOC'],
+							'amount'		=> $_order_info[0]['act_draw'],
+							'flag'			=> false,
+							'callback'		=> route('user_withdraw_verify_otc'),
+					]);
+					$_ret = $this->_exte_register_playerId_main($this->_withdraw_verify, $data->toJson());
+				}
+				//开始出金退回处理
+				$mt4 = $this->_exte_mt4_deposit_amount($_order_info[0]['user_id'], $_order_info[0]['apply_amount'], $_order_info[0]['user_id']. "-#" . $_order_info[0]['mt4_trades_no'] . self::CJTH);
+				$info = $this->_exte_get_user_info($_order_info[0]['user_id']);
+				$phone = substr($info['phone'], (stripos($info['phone'], '-') + 1));
+				$data = array('user_name' => $info[0]['user_name'], 'user_id' => $info[0]['user_id'], 'amt' => $_order_info[0]['apply_amount']);
+				if ($mt4['ret'] == '0') {
+					$num = DrawRecordLog::where('draw_record_log.record_id', $orderId)->where('draw_record_log.voided', '1')
+							->update([
+									'apply_status'      => $orderStatus,
+									'orderId_OTC_status'=> '4', //审核拒绝出款请求,出金即将退回
+									'apply_remark'      => ($orderStatus == 2) ? '' : $orderRemark,
+									'rec_upd_user'      => $this->_auser['username'],
+									'rec_upd_date'      => date('Y-m-d H:i:s'),
+							]);
+					//出金退回短信通知
+					$_phone = $this->_exte_send_phone_notify($phone, 'widthdrawTH', $data);
+				}
+			} else {
+				//OTC提款审核同意
+				$data = collect([
+					'orderId'		=> $_order_info[0]['orderId_LOC'],
+					'amount'		=> $_order_info[0]['act_draw'],
+					'flag'			=> true,
+					'callback'		=> route('user_withdraw_verify_otc'),
+				]);
+				
+				$_ret = $this->_exte_register_playerId_main($this->_withdraw_verify, $data->toJson());
+				if($_ret['flag'] == 'success') {
+					$num = DrawRecordLog::where('draw_record_log.record_id', $orderId)->where('draw_record_log.voided', '1')
+							->update([
+									//'apply_status'      => $orderStatus,
+									'orderId_OTC_status'=> '3', //审核同意出款请求,但还没出款
+									'apply_remark'      => ($orderStatus == 2) ? '' : $orderRemark,
+									'rec_upd_user'      => $this->_auser['username'],
+									'rec_upd_date'      => date('Y-m-d H:i:s'),
+							]);
+				} else {
+					return response()->json([
+							'msg'               => 'FAIL',
+							'err'               => 'OTCWITHDRAWFAIL',
+							'col'               => $_ret,
+					]);
+				}
+			}
+			
+			if ($num) {
+				return response()->json([
+						'msg'               => 'SUC',
+						'err'               => 'NOERR',
+						'col'               => $_ret,
+				]);
+			} else {
+				return response()->json([
+						'msg'               => 'FAIL',
+						'err'               => 'UPDATEFAIL',
+						'col'               => '$_ret',
+				]);
+			}
+		}
+		
 		public function withdrawExport (Request $request)
 		{
 			$param                  = $request->data;
@@ -144,6 +329,90 @@
 			return response()->download($file);
 		}
 		
+		//OTC 提款回调
+		public function withdraw_notify_response_success_otc(Request $request)
+		{
+			$_retrun_data['outOrderId_LOC']	= $request->orderId; //本地传给OTC的订单号
+			$_retrun_data['outOrderId_OTC']	= $request->otc_order; //OTC回传的的订单号
+			$_retrun_data['amount']			= $request->legalAmount;//玩家支付金额
+			$_retrun_data['act_amount']		= $request->coinAmount;//实际到帐金额
+			$_retrun_data['account']		= $request->account;//提款用户Id
+			$_retrun_data['playerId']		= $request->playerId;//玩家Id
+			$_retrun_data['orderStatus']	= ($request->status == '1') ? 200 : $request->status; //1=下单成功，2下单不成功
+			$_retrun_data['data']			= $request->all();
+			$this->debugfile($_retrun_data, '支付异步提款回调OTC', 'PayPostRetrunWithDrawOTC');
+			
+			if ($_retrun_data['orderStatus'] == 200) {
+				//下单成功
+				$_rs = DrawRecordLog::where('user_id', $_retrun_data['account'])->where('apply_status', '0')
+						->where('orderId_LOC', $_retrun_data['outOrderId_LOC'])
+						->where('voided', '1')
+						->update([
+								'orderId_OTC'			=> $_retrun_data['outOrderId_OTC'],
+								'generate_order_date'	=> date('Y-m-d H:i:s'),
+						]);
+			}
+		}
+		
+		//OTC 审核回调
+		public function withdraw_verify_success_otc(Request $request)
+		{
+			$_retrun_data['status']			= $request->status; //提款是否成功 1成功 2失败
+			$_retrun_data['orderId']		= $request->orderId; //本地传给OTC的订单号
+			$_retrun_data['data']			= $request->all();
+			
+			$this->debugfile($_retrun_data, '异步提款验证回调OTC', 'PayPostRetrunWithDrawVerifyOTC');
+			if($_retrun_data['status'] == 1) {
+				//OTC提款成功
+				$_rs = DrawRecordLog::where('orderId_LOC', $_retrun_data['orderId'])
+						->where('voided', '1')
+						->update([
+								'orderId_OTC_status'	=> '2', //出款成功
+								'apply_status'			=> '2', //出金成功
+								'rec_upd_user'      	=> $this->_auser['username'],
+								'rec_upd_date'      	=> date('Y-m-d H:i:s'),
+						]);
+			} else {
+				//OTC提款失败
+				$_rs = DrawRecordLog::where('orderId_LOC', $_retrun_data['orderId'])
+						->where('voided', '1')
+						->update([
+								'orderId_OTC_status'	=> '1', //出金失败
+								'rec_upd_user'      	=> $this->_auser['username'],
+								'rec_upd_date'      	=> date('Y-m-d H:i:s'),
+						]);
+			}
+		}
+		
+		//查看 OTC 订单详情 TODO 暂时没用
+/*		public function OTCwithdrawOrderIdDetail(Request $request)
+		{
+			$recordId			= $request->recordId;
+			$userId				= $request->userId;
+			
+			//$_rs				= DrawRecordLog::where('voided', '1')->find($recordId);
+			$data				 = collect([
+				'otc_order'			=> 'ZO20181225202737854xSaLGeDt3',//$_rs->orderId_OTC,
+				'account'			=> '318001'//$_rs->user_id,
+			]);
+			
+			$ret = $this->_exte_register_playerId_main($this->_otc_order_detail_url, $data->toJson());
+			dd($ret);exit();
+			if($ret['flag'] == 'success') {
+				return response()->json([
+						'msg'               => $ret['url'],
+						'err'               => 'NOERR',
+						'col'               => $ret,
+				]);
+			} else {
+				return response()->json([
+						'msg'               => 'FAIL',
+						'err'               => 'OTCERR',
+						'col'               => $ret,
+				]);
+			}
+		}*/
+		
 		protected function get_all_withdraw_list($totalType, $data)
 		{
 			$query_sql = DrawRecordLog::selectRaw("
@@ -160,6 +429,9 @@
 				draw_record_log.draw_bank_no as drawbankno,
 				draw_record_log.draw_bank_class as drawbankclass,
 				draw_record_log.apply_status as applystatus,
+				draw_record_log.orderId_LOC as orderIdLOC,
+				draw_record_log.orderId_OTC as orderIdOTC,
+				draw_record_log.orderId_OTC_status as orderIdOTCstatus,
 				draw_record_log.apply_remark,
 				draw_record_log.rec_crt_user,
 				draw_record_log.rec_upd_user,

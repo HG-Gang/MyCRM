@@ -37,6 +37,7 @@
 			['label' => '出金申请', 'url' => route_prefix() . '/amount/withdraw_apply', 'menu_tag' => 'withdraw_apply'],
 			['label' => '入金流水', 'url' => route_prefix() . '/amount/deposit_flow', 'menu_tag' => 'deposit_flow'],
 			['label' => '出金流水', 'url' => route_prefix() . '/amount/withdraw_flow', 'menu_tag' => 'withdraw_flow'],
+			['label' => '未付流水', 'url' => route_prefix() . '/amount/undeposit_flow', 'menu_tag' => 'undeposit_flow'],
 			['label' => '权益统计', 'url' => route_prefix() . '/amount/rights_summary', 'menu_tag' => 'rights_summary'],
 			['label' => '外汇牌价', 'url' => route_prefix() . '/amount/whpj_rate', 'menu_tag' => 'whpj_rate'],
 		]

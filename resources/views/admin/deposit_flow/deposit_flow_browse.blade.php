@@ -77,7 +77,7 @@
 					return getAccountdepositType(value);
 				}},
 				{field:'directComment' ,title:'{{ trans ('systemlanguage.account_deposit_comment') }}', width:100, align:'center',},
-				{field:'depoutTrande' ,title:'{{ trans ('systemlanguage.account_deposit_flownumber') }}', width:100, align:'center', formatter: function (value, rowData, rowIndex) {
+				/*{field:'depoutTrande' ,title:'{{ trans ('systemlanguage.account_deposit_flownumber') }}', width:100, align:'center', formatter: function (value, rowData, rowIndex) {
 						if (value) {
 							return value;
 						} else if (rowData.userId) {
@@ -85,6 +85,15 @@
 						} else {
 						    return '';
 						}
+				}},*/
+				{field:'depoutChannelNo' ,title:'{{ trans ('systemlanguage.account_deposit_flownumber') }}', width:100, align:'center', formatter: function (value, rowData, rowIndex) {
+					if (value) {
+						return value;
+					} else if (rowData.userId) {
+						return "==========";
+					} else {
+						return '';
+					}
 				}},
 				{field:'directModifyTime' ,title:'{{ trans ('systemlanguage.account_deposit_datetme') }}', width:100, align:'center',},
 			]];

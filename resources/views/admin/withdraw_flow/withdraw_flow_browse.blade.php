@@ -26,6 +26,7 @@
 						<option value="-ZH">佣金转户</option>
 						<option value="-TH">佣金退回</option>
 						<option value="-QK">账户取款</option>
+						<option value="-FY">账户返佣</option>
 						<option value="-CJTH">出金退回</option>
 						<option value="-Adj">平台出金</option>
 					</select>

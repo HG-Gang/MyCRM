@@ -78,9 +78,18 @@
 		//账户存款
 		Route::get('deposit', 'User\UserDepositController@deposit_browse');
 		Route::any('deposit_request', 'User\UserDepositController@deposit_request')->name('user_deposit_request');
+		Route::any('deposit_request_otc', 'User\UserDepositController@deposit_request_otc')->name('user_deposit_request_otc');
 		//异步
 		Route::any('deposit_notfiy', 'PayController\PayCallBackController@deposit_notify_response_success')->name('user_deposit_notfiy');
 		Route::any('deposit_notfiy2', 'PayController\PayCallBackController@deposit_notify_response_success2')->name('user_deposit_notfiy2');
+		
+		//OTC支付回调
+		Route::any('deposit_notfiy_otc', 'PayController\PayCallBackController@deposit_notify_response_success_otc')->name('user_deposit_notfiy_otc');
+		//OTC 提款回调
+		Route::any('withdraw_notfiy_otc', 'Admin\WithdrawAmountController@withdraw_notify_response_success_otc')->name('user_withdraw_notfiy_otc');
+		//OTC 提款验证
+		Route::any('withdraw_verify_otc', 'Admin\WithdrawAmountController@withdraw_verify_success_otc')->name('user_withdraw_verify_otc');
+		
 		//页面
 		Route::any('deposit_return', 'PayController\PayCallBackController@deposit_return_response_success')->name('user_deposit_return');
 		Route::any('deposit_return2', 'PayController\PayCallBackController@deposit_return_response_success2')->name('user_deposit_return2');
@@ -88,6 +97,7 @@
 		//账户取款
 		Route::get('withdraw', 'User\UserWithdrawController@withdraw_browse');
 		Route::post('withdraw_request', 'User\UserWithdrawController@withdraw_request');
+		Route::post('withdraw_request_OTC', 'User\UserWithdrawController@withdraw_request_OTC');
 		
 		//账户流水
 		Route::group(['prefix' => 'flow'], function () {
@@ -178,7 +188,10 @@
 	//Route::get('comm_summary', 'User\PositionSummaryController@_exte_mt4_sync_comm_summary');
 	Route::get('test_serach/{id}', 'User\PositionSummaryController@test_serach_id');
 	Route::post('test_export', 'User\PositionSummaryController@position_summary_export');
-	
+
+	Route::get('test_order', 'Admin\WithdrawAmountController@OTCwithdrawOrderIdDetail');
+
+
 	//爆仓清零
 	Route::get('trades_exp_zero', 'Admin\AdminWhsExpZeroController@trades_whs_exp_zero');
 	Route::get('whstest', 'Admin\AdminWhsExpZeroController@whsCustListSearch');

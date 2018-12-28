@@ -814,8 +814,8 @@ function getWithdrawApplyStatus(value) {
 		case "1":
 			return "<span style='color: #0066FF;'>正在处理</span>";
 		break;
-			case "2":
-		return "<span style='color: #4B0082 ;'>已处理</span>";
+		case "2":
+			return "<span style='color: #4B0082 ;'>已处理</span>";
 		break;
 		case "3":
 			return "<span style='color: #FF0000;'>处理失败</span>";
@@ -946,6 +946,120 @@ function withdrawOrderIdDetail(orderId, ticket) {
         content: route_prefix() + "/amount/orderId_detail/" + orderId,
     });
 }
+
+//查看OTC订单状态
+function OTCwithdrawOrderIdDetail(recordId, userId, url, token) {
+	var index1 = openLoadShade();
+	$.ajax({
+		url: route_prefix() + url,
+		data: {
+			orderId: recordId,
+			userId: userId,
+			_token: token,
+		},
+		dateType: "JSON",
+		type: "POST",
+		async: false,
+		success: function (data) {
+			console.log(data.col);
+			layer.open({
+				type: 2,
+				title: false,
+				closeBtn: 1,
+				area: ['750px', '550px'],
+				content: data.msg,
+				cancel: function(index, layero){
+					layer.closeAll();
+				}
+			});
+		},
+		error: function () {
+			console.log(data.col);
+			closeLoadShade(index1)
+			layer.msg("未知错误,请尝试重新操作或联系技术人员.");
+		}
+	});
+}
+
+function GenerateOTCorder(orderId, userId, url, token) {
+	var index1 = openLoadShade();
+	$.ajax({
+		url: route_prefix() + url,
+		data: {
+			orderId: orderId,
+			userId: userId,
+			_token: token,
+		},
+		dateType: "JSON",
+		type: "POST",
+		async: false,
+		success: function (data) {
+			if (data.err == "noerr") {
+				closeLoadShade(index1);
+				openOTCwithdrawUrl(data.msg, data.col, token);
+			} else if(data.err == "errexists") {
+				closeLoadShade(index1);
+				layer.msg("订单号已经生成,请进入操作审核流程.", {icon: 5});
+			} else {
+				closeLoadShade(index1)
+				layer.msg("下单失败,请联系技术人员.", {icon: 5});
+			}
+		},
+		error: function () {
+			closeLoadShade(index1)
+			layer.msg("未知错误,请尝试重新操作或联系客服.");
+		}
+	});
+}
+
+function openOTCwithdrawUrl(url, recordId, token) {
+	window.open(url);
+	/*layer.open({
+		type: 2,
+		title: false,
+		closeBtn: 1,
+		area: ['750px', '550px'],
+		content: url,
+		cancel: function(index, layero){
+			layer.closeAll();
+		}
+	});*/
+}
+
+/*function updateCurrOrderId(recordId, token) {
+	$.ajax({
+		url: route_prefix() + '/amount/updateCurrOrderId',
+		data: {
+			recordId: recordId,
+			_token: token,
+		},
+		dateType: "JSON",
+		type: "POST",
+		async: false,
+		success: function (data) {
+			if (data.msg == "SUCCESS") {
+				$.ajax({
+					url: route_prefix() + '/amount/withdrawApplySearch',
+					data: {
+						page: 1,
+						rows: 20,
+						_token: token,
+					},
+					type: "POST",
+					success: function () {
+						layer.msg("订单号更新成功.", {icon: 6});
+					},
+				});
+				layer.closeAll();
+			} else {
+				layer.msg("订单号更新失败,请联系技术人员.", {icon: 5});
+			}
+		},
+		error: function () {
+			layer.msg("未知错误,请尝试重新操作或联系客服.");
+		}
+	});
+}*/
 
 //用户ID, 登录人角色
 function userIdDetail(value, role) {

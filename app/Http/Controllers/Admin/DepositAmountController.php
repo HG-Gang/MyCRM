@@ -192,9 +192,10 @@
 		protected function _exte_modify_data_structure($_rs)
 		{
 			foreach ($_rs as $k => $v) {
-				$data[$k] = DepositRecordLog::select('dep_amount', 'dep_outTrande')->where('dep_mt4_id', $v['order_no'])->where('dep_status', '02')->where('voided', '02')->get()->toArray();
+				$data[$k] = DepositRecordLog::select('dep_amount', 'dep_outTrande', 'dep_outChannelNo')->where('dep_mt4_id', $v['order_no'])->where('dep_status', '02')->where('voided', '02')->get()->toArray();
 				$_rs[$k]['depamount'] = (empty($data[$k])) ? 0 : $data[$k][0]['dep_amount'];
 				$_rs[$k]['depoutTrande'] = (empty($data[$k])) ? '' : $data[$k][0]['dep_outTrande'];
+				$_rs[$k]['depoutChannelNo'] = (empty($data[$k])) ? '' : $data[$k][0]['dep_outChannelNo'];
 			}
 			
 			return $_rs;

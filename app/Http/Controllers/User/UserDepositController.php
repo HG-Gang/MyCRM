@@ -25,11 +25,24 @@
 			
 			//获取当天入金规则
 			$_today_role = $this->_exte_get_system_param('DEPOSITRULE');
-
+			
 			$_user_info = $this->_exte_get_user_info($this->_user['user_id']);
-
-			if($this->_user['user_id'] == 637001) {
+			
+			return view('user.user_deposit.user_deposit_browse_OTC')->with([
+					'_user_info'        => $_user_info,
+					'_sys_conf'         => $_sys_conf[0],
+					'_global_role'      => $_global_role[0],
+					'_today_role'       => $this->_exte_handle_deposit_role_structur_data($_today_role[0]),
+			]);
+			
+			/*if($this->_user['user_id'] == 637001) {
 				return view('user.user_deposit.user_deposit_browse_test')->with([
+						'_user_info'        => $_user_info,
+						'_sys_conf'         => $_sys_conf[0],
+						'_global_role'      => $_global_role[0],
+						'_today_role'       => $this->_exte_handle_deposit_role_structur_data($_today_role[0]),
+				]);
+				return view('user.user_deposit.user_deposit_browse_OTC')->with([
 						'_user_info'        => $_user_info,
 						'_sys_conf'         => $_sys_conf[0],
 						'_global_role'      => $_global_role[0],
@@ -42,7 +55,7 @@
 						'_global_role'      => $_global_role[0],
 						'_today_role'       => $this->_exte_handle_deposit_role_structur_data($_today_role[0]),
 				]);
-			}
+			}*/
 		}
 		
 		public function deposit_request (Request $request) {
@@ -74,5 +87,28 @@
 			$PayConf = new PayConfigController();
 			
 			$PayConf->form_init($param);
+		}
+		
+		public function deposit_request_otc(Request $request)
+		{
+			$userId                 = $request->userId;
+			$playerId           	= $request->playerId; //OTC入金ID
+			$deposit_amt            = $request->deposit_amt; //存款金额
+			$deposit_act_amt        = $request->deposit_act_amt; //实际到账金额
+			$deposit_rate           = $request->deposit_rate; //汇率
+			
+			$act_amt_USD            = number_format(($deposit_amt / $deposit_rate), '2', '.', '');
+			
+			$param = array(
+					'userId'            => $userId,
+					'playerId'			=> $playerId,
+					'deposit_amt'       => $deposit_amt,
+					'deposit_act_amt'   => $act_amt_USD,
+					'deposit_rate'		=> $deposit_rate,
+			);
+			
+			$PayConf = new PayConfigController();
+			
+			$PayConf->form_init_otc($param);
 		}
 	}

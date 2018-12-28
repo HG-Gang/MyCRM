@@ -71,24 +71,26 @@
 					return getWithdrawApplyStatus(value);
 				}},
 				{field:'rec_crt_date' ,title:'{{ trans ('systemlanguage.account_rec_crt_date') }}', width:100, align:'center',},
-				{field:'useredit' ,title:'{{ trans ('systemlanguage.account_apply_options') }}' ,width:110, align:'center',formatter: function (value, rowData, rowIndex) {
-					if (rowData.applystatus == "0") {
-						return '<a href="javascript:;" onclick="withdrawOrderIdDetail('+ rowData.record_id +', '+ rowData.mt4_ticket +')" class="l-btn l-btn-small l-btn-plain" style="color: blue;">' +
-									'<span class="l-btn-left l-btn-icon-left">' +
-										'<span class="l-btn-text">操作</span>' +
-										'<span class="l-btn-icon icon-edit">&nbsp;</span>' +
-									'</span>'+
-								'</a>';
-					} else {
-						return '<a href="javascript:;" onclick="withdrawOrderIdDetail('+ rowData.record_id +', '+ rowData.mt4_ticket +')" class="l-btn l-btn-small l-btn-plain">' +
-									'<span class="l-btn-left l-btn-icon-left">' +
-										'<span class="l-btn-text" style="color: black;">查看</span>' +
-										'<span class="l-btn-icon icon-search">&nbsp;</span>' +
-									'</span>'+
-								'</a>';
-					}
-				}},
-			]];
+				@if($permit == 1 || $permit == 3)
+					{field:'useredit' ,title:'{{ trans ('systemlanguage.account_apply_options') }}' ,width:110, align:'center',formatter: function (value, rowData, rowIndex) {
+						if (rowData.applystatus == "0") {
+							return '<a href="javascript:;" onclick="withdrawOrderIdDetail('+ rowData.record_id +', '+ rowData.mt4_ticket +')" class="l-btn l-btn-small l-btn-plain" style="color: blue;">' +
+										'<span class="l-btn-left l-btn-icon-left">' +
+											'<span class="l-btn-text">操作</span>' +
+											'<span class="l-btn-icon icon-edit">&nbsp;</span>' +
+										'</span>'+
+									'</a>';
+						} else {
+							return '<a href="javascript:;" onclick="withdrawOrderIdDetail('+ rowData.record_id +', '+ rowData.mt4_ticket +')" class="l-btn l-btn-small l-btn-plain">' +
+										'<span class="l-btn-left l-btn-icon-left">' +
+											'<span class="l-btn-text" style="color: black;">查看</span>' +
+											'<span class="l-btn-icon icon-search">&nbsp;</span>' +
+										'</span>'+
+									'</a>';
+						}
+					}},
+				@endif
+		]];
 			
 			config.Buttons = [{
 				text: '{{ trans ('systemlanguage.export') }}',

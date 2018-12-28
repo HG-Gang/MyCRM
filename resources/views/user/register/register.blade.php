@@ -142,7 +142,7 @@
 	<div class="layui-form-item">
 		<label class="layui-form-label">确认密码</label>
 		<div class="layui-input-inline">
-			<input type="password" id="againpassword" name="againpassword" placeholder="请输入确认密码" autocomplete="off" class="layui-input" style="width: 400px;">
+			<input type="password" id="againpassword" name="againpassword" lay-verify="againpassword" placeholder="请输入确认密码" autocomplete="off" class="layui-input" style="width: 400px;">
 		</div>
 	</div>
 	<div class="layui-form-item">

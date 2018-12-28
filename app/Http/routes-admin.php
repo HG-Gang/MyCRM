@@ -110,9 +110,18 @@
 			Route::get('amount/withdraw_apply', 'Admin\WithdrawAmountController@withdraw_apply');
 			Route::get('amount/orderId_detail/{orderId}', 'Admin\WithdrawAmountController@withdrawOrderIdDetail');
 			Route::post('amount/order_status', 'Admin\WithdrawAmountController@withdrawOrderStaus');
+			Route::post('amount/order_status_OTC', 'Admin\WithdrawAmountController@withdrawOrderStaus_OTC');
+			Route::post('amount/OTCwithdrawOrderIdDetail', 'Admin\WithdrawAmountController@OTCwithdrawOrderIdDetail');
+			
 			Route::post('amount/withdrawApplySearch', 'Admin\WithdrawAmountController@withdrawApplySearch');
 			Route::post('amount/withdrawApplyExport', 'Admin\WithdrawAmountController@withdrawExport');
 			Route::get('amount/withdraw_downloadfile/{file}/{role}', 'Admin\WithdrawAmountController@withdraw_downloadfile')->name('admin_withdraw_download');
+			
+			//生成 OTC 订单
+			Route::post('amount/generate_OTCorder', 'Admin\WithdrawAmountController@generateOTCorder');
+			//重新更新订单号
+			Route::post('amount/updateCurrOrderId', 'Admin\WithdrawAmountController@updateCurrOrderId');
+			
 			###入金流水
 			Route::get('amount/deposit_flow', 'Admin\DepositAmountController@deposit_flow');
 			Route::post('amount/depositFlowSearch', 'Admin\DepositAmountController@depositFlowSearch');
@@ -123,6 +132,11 @@
 			Route::post('amount/withdrawFlowSearch', 'Admin\WithdrawFlowController@withdrawFlowSearch');
 			Route::post('amount/withdrawFlowExport', 'Admin\WithdrawFlowController@withdrawExport');
 			Route::get('amount/withdrawDownloadfile/{file}/{role}', 'Admin\WithdrawFlowController@DownloadFile')->name('admin_withdraw_flow_download');
+			
+			//未支付账单流水
+			Route::get('amount/undeposit_flow', 'Admin\UnDepositAmountController@undeposit_flow');
+			Route::post('amount/undepositFlowSearch', 'Admin\UnDepositAmountController@undepositFlowSearch');
+			
 			###权益统计
 			Route::get('amount/rights_summary', 'Admin\RightsSummaryController@rights_summary_browse');
 			Route::get('amount/rightsSummarySearchDetail/{uid}/{status}/{sumdata}', 'Admin\RightsSummaryController@RightsSummarySearchDetail');

@@ -49,6 +49,14 @@
 		
 		protected $_agentsIdIndex       = 637001;
 		
+		protected $_player_url          = 'http://103.68.180.177:33333/register';
+		
+		protected $_withdraw_url        = 'http://103.68.180.177:33333/withdraw';
+		
+		protected $_withdraw_verify		= 'http://103.68.180.177:33333/verify';
+		
+		protected $_otc_order_detail_url = 'http://103.68.180.177:33333/query_order';
+		
 		public function __construct(Request $request, NofityInfo $nofityInfo) {
 			
 			$this->_page                = $request->page;
@@ -59,6 +67,62 @@
 			$this->_notify              = $nofityInfo;
 			
 		}
+		
+		//===================注册入金ID=======================
+		/*
+		 * {"flag":"success", "playerId":100001},{"flag":"fail", "reason":"........."}
+		 * */
+		protected function _exte_register_playerId($id)
+		{
+			$data = collect(['account' => (string)$id]);
+			
+			return $this->_exte_register_playerId_main($this->_player_url, $data->toJson());
+		}
+		
+		protected function _exte_register_playerId_main($url, $data)
+		{
+			$client = new \GuzzleHttp\Client();
+			$request = $client->post($url, ['body' => $data]);
+			$response = $request->getBody();
+			return json_decode($response, true);
+		}
+		
+		protected function _exte_update_register_playerId()
+		{
+			$_rs = array();
+			if($this->_user['player_Id'] == 0 || $this->_user['player_Id'] == '') {
+				/*
+				 * {"flag":"success", "playerId":100001},{"flag":"fail", "reason":"........."}
+				 * */
+				$_ret = $this->_exte_register_playerId($this->_user['user_id']);
+				$_table = $this->_exte_get_table_obj($this->_user['user_id']);
+				if($_ret['flag'] == 'success') {
+					$_rs = $_table::where('user_id', $this->_user['user_id'])
+							->whereIn('voided', array ('1', '2'))
+							->whereIn('user_status', array ('0', '1', '2', '4'))
+							->update([
+									'player_Id' => $_ret['playerId'],
+							]);
+					
+					$_rs = array('flag' => $_ret['flag'], 'upd' => $_rs);
+				} else if ($_ret['flag'] == 'fail'&& $_ret['reason'] == 'account exist') {
+					$_rs = $_table::where('user_id', $this->_user['user_id'])
+							->whereIn('voided', array ('1', '2'))
+							->whereIn('user_status', array ('0', '1', '2', '4'))
+							->update([
+									'player_Id' => $_ret['playerId'],
+							]);
+					$_rs = array('flag' => $_ret['flag'], 'upd' => $_rs);
+				} else if ($_ret['flag'] == 'fail'&& $_ret['reason'] != 'account exist') {
+					$_rs = $_ret;
+				}
+			} else {
+				$_rs = array('flag' => 'existsId', 'upd' => 'noupd');
+			}
+			
+			return $_rs;
+		}
+		//======================End=============================
 		
 		//env('MAIL_USERNAME');
 		protected function _exte_email_from ()

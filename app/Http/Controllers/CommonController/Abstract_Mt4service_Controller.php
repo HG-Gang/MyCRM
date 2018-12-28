@@ -46,7 +46,8 @@
 		
 		protected function _exte_mt4_host()
 		{
-			return $this->_mt4_host = '';
+			//测试 http://120.79.221.105/, st.titanera.com, 47.75.157.81, 47.91.219.55, 47.91.219.55, http://47.75.246.177/MT4API/RaiseAccount
+			return $this->_mt4_host = '47.91.219.55';
 		}
 		
 		protected function _exte_mt4_port()
@@ -261,7 +262,8 @@
 		/*其他操作API*/
 		protected function _exte_mt4_url()
 		{
-			return $this->_mt4_url = '';
+			//alisz.titanera.com, 47.75.157.81, http://47.75.123.86:9997/api
+			return $this->_mt4_url = 'http://47.75.246.177:9997/api';
 		}
 		
 		protected function _exte_mt4_options_crt_user()

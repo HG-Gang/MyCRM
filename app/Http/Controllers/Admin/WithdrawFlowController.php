@@ -66,7 +66,7 @@
 						$subQuery->orWhere('mt4_trades.COMMENT', 'like',  '%-ZH') //佣金转户
 						->orWhere('mt4_trades.COMMENT', 'like', '%-TH') //佣金转户退回
 						->orWhere('mt4_trades.COMMENT', 'like', '%-QK') //取款
-						//->orWhere('COMMENT', 'like', '%-FY') //返佣
+						->orWhere('COMMENT', 'like', '%-FY') //返佣
 						//->orWhere('mt4_trades.COMMENT', 'like', '%-RJ') // 批量入金
 						//->orWhere('mt4_trades.COMMENT', 'like', '%-XY') // 信用
 						->orWhere('mt4_trades.COMMENT', 'like', '%-CJTH'); // 出金失败，退回

@@ -39,7 +39,7 @@
 			<div class="layui-inline">
 				<label class="layui-form-label">E-mail</label>
 				<div class="layui-input-block">
-					@if($role == 'admin' && $permit == 1)
+					@if($role == 'admin' && ($permit == 1 || $permit == 2 || $permit == 3))
 						<input type="text" name="useremail" id="useremail" value="{{ $_info['email'] }}" autocomplete="off" class="layui-input" readonly="" style="width:200px; background: #e9e9e9; color: #0066ff;">
 					@else
 						<input type="text" name="useremail" id="useremail" value="{{ substr_replace($_info['email'], '*****', 3, (stripos($_info['email'], '@') - 3)) }}" autocomplete="off" class="layui-input" readonly="" style="width:200px; background: #e9e9e9; color: #0066ff;">
@@ -125,6 +125,14 @@
 				<label class="layui-form-label">开户时间</label>
 				<div class="layui-input-block">
 					<input type="text" name="reccrtdate" id="reccrtdate" value="{{ $_info['rec_crt_date'] }}" autocomplete="off" class="layui-input" readonly="" style="width:200px; background: #e9e9e9; color: #0066ff;">
+				</div>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<div class="layui-inline">
+				<label class="layui-form-label">备注</label>
+				<div class="layui-input-block">
+					<input type="text" name="userremark" id="userremark" value="{{ $_info['remark'] }}" autocomplete="off" class="layui-input" style="width: 850px; background: #e9e9e9; color: #0066ff;">
 				</div>
 			</div>
 		</div>

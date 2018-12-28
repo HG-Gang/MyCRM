@@ -22,6 +22,9 @@ class VerifyCsrfToken extends BaseVerifier
 	    'user/deposit_return',
 	    'user/deposit_notfiy2',
 	    'user/deposit_return2',
+		'user/deposit_notfiy_otc',
+		'user/withdraw_notfiy_otc',
+		'user/withdraw_verify_otc',
 	    //'user/position/positionSummarySearch',
     ];
 }
