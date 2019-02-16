@@ -44,18 +44,17 @@
 		
 		protected $_notify              = '';
 		
-		//普通客户和代理商直接的UserId区别，代理编号 637001-637999， 客户编号 40370001-40379999
 		protected $_userIdIndex        	= '40370001';
 		
 		protected $_agentsIdIndex       = 637001;
 		
-		protected $_player_url          = 'http://103.68.180.177:33333/register';
+		protected $_player_url          = '';
 		
-		protected $_withdraw_url        = 'http://103.68.180.177:33333/withdraw';
+		protected $_withdraw_url        = '';
 		
-		protected $_withdraw_verify		= 'http://103.68.180.177:33333/verify';
+		protected $_withdraw_verify	= '';
 		
-		protected $_otc_order_detail_url = 'http://103.68.180.177:33333/query_order';
+		protected $_otc_order_detail_url= '';
 		
 		public function __construct(Request $request, NofityInfo $nofityInfo) {
 			
