@@ -152,11 +152,11 @@
 		}
 		
 		public function serverUrl2 () {
-			return $this->_serverUrl2 = 'http://gw_yyf.ppp3.xyz/webpay';
+			return $this->_serverUrl2 = '';
 		}
 		
 		public function deposit_url_otc() {
-			return $this->_deposit_url_otc = 'http://103.68.180.177:33333/deposit';
+			return $this->_deposit_url_otc = '';
 		}
 		
 		public function bankCode($bankCode) {
