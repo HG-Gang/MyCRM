@@ -46,7 +46,6 @@
 		
 		protected function _exte_mt4_host()
 		{
-			//测试 http://120.79.221.105/, st.titanera.com, 47.75.157.81, 47.91.219.55, 47.91.219.55, http://47.75.246.177/MT4API/RaiseAccount
 			return $this->_mt4_host = '47.91.219.55';
 		}
 		
@@ -64,8 +63,7 @@
 		protected function _exte_mt4_query_request ($query)
 		{
 			//TCP数据样本
-			//NEWACCOUNT MASTER=password|IP=103.193.174.54|GROUP=2|LOGIN=81052|NAME=test|PASSWORD=mk12345678|INVESTOR=|EMAIL=|COUNTRY=China|STATE=|CITY=|ADDRESS=|COMMENT=|PHONE=|PHONE_PASSWORD=|STATUS=|ZIPCODE=|ID=|LEVERAGE=100|AGENT=|SEND_REPORTS=1|DEPOSIT=50000[0A]QUIT[0A]
-			//---- open socket
+			
 			$connectMT4 = @fsockopen($this->_exte_mt4_host(), $this->_exte_mt4_port(), $errno='', $errstr='', $this->_exte_mt4_timeout());
 			
 			if($connectMT4)
@@ -115,7 +113,7 @@
 		
 		protected function _exte_mt4_same($act)
 		{
-			return $act . ' MASTER=jja123|IP='. $this->_exte_get_user_loginIp() .'|';
+			return $act . ' MASTER=******|IP='. $this->_exte_get_user_loginIp() .'|';
 		}
 		
 		/*
@@ -262,8 +260,7 @@
 		/*其他操作API*/
 		protected function _exte_mt4_url()
 		{
-			//alisz.titanera.com, 47.75.157.81, http://47.75.123.86:9997/api
-			return $this->_mt4_url = 'http://47.75.246.177:9997/api';
+			return $this->_mt4_url = '';
 		}
 		
 		protected function _exte_mt4_options_crt_user()
