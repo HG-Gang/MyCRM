@@ -29,7 +29,7 @@
 		}
 		
 		public function index(Request $request) {
-			
+			dd('test');
 			//TODO 每一次刷新URL时,通过API请求，更新当前账户信息
 			if (env('SYNCMT4_UPDATEINFO')) {
 				$_rs = $this->_exte_mt4_update_local_user_info ($this->_user['user_id']);
